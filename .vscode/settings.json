@@ -1,0 +1,28 @@
+{
+  // General editor settings
+  "editor.minimap.enabled": false,
+  "editor.wordWrap": "on",
+  "window.commandCenter": true,
+  "editor.colorDecorators": true,
+
+  // Hide from the Explorer sidebar
+  "files.exclude": {
+    "**/node_modules": true
+  },
+
+  // Markdownlint
+  "[markdown]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll.markdownlint": "explicit"
+    }
+  },
+
+  // Biome: format + safe fixes on save (not HTML: formatter off by default)
+  "[javascript][css][json][jsonc][yaml]": {
+    "editor.defaultFormatter": "biomejs.biome",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.biome": "explicit"
+    }
+  }
+}

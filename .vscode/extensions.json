@@ -1,0 +1,7 @@
+{
+  "recommendations": [
+    "biomejs.biome", // Formatter and linter for JS/CSS/JSON/YAML, lints HTML
+    "anthropic.claude-code", // Anthropic Claude Code
+    "davidanson.vscode-markdownlint" // Markdown linter
+  ]
+}
