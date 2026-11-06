@@ -1,7 +1,8 @@
 gitignore: true
 
 ignores:
-  - ".claude/skills/teach/**"
+  - ".claude/skills/teach/**" # Vendor `npx skills@latest add mattpocock/skills -s teach -a claude-code --copy -y`
+  - ".claude/skills/playwright-cli/**" # Vendor `playwright-cli install --skills`
 
 config:
   default: true # Enable all rules by default
