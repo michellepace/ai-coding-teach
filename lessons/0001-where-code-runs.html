@@ -247,7 +247,8 @@
               A database keeps its data in <strong>tables</strong>. Each <strong>row</strong> of
               this one is a category. There are five rows, so the loader gets back a list of five
               items. <em>This</em> is where the 5 comes from. It is a count of rows, not a number
-              anyone wrote down.
+              anyone wrote down. To see this table yourself, run
+              <code>npx drizzle-kit studio</code>.
             </p>
           </li>
 
@@ -304,32 +305,36 @@
       <table>
         <thead>
           <tr>
-            <th>Code</th>
+            <th>What</th>
             <th>Where it runs</th>
+            <th>How to see it</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>The <code>loader</code> in a route file</td>
+            <td>The <code>loader</code> function inside a route file</td>
             <td><span class="lane" data-lane="server">Server</span> only</td>
+            <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>, search <code>export async function loader</code></td>
           </tr>
           <tr>
-            <td>The component in a route file, such as <code>Home</code></td>
+            <td>The component function inside a route file</td>
             <td>
               <span class="lane" data-lane="server">Server</span> first, then
               <span class="lane" data-lane="browser">Browser</span>
             </td>
+            <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>, search <code>export default function</code></td>
           </tr>
           <tr>
-            <td>Everything in <code>app/services/</code>, and <code>app/db/index.ts</code></td>
+            <td>The service files in <code>app/services/</code>, plus <code>app/db/index.ts</code></td>
             <td><span class="lane" data-lane="server">Server</span> only</td>
+            <td><kbd>Ctrl</kbd>+<kbd>P</kbd>, type <code>services/</code> or <code>db/index.ts</code></td>
           </tr>
           <tr>
-            <td><code>data.db</code></td>
+            <td>The database file, <code>data.db</code> (data, not code)</td>
             <td>
-              <span class="lane" data-lane="database">Database</span> Not code. Only the server
-              opens it.
+              <span class="lane" data-lane="database">Database</span> Only the server opens it.
             </td>
+            <td>Run <code>npx drizzle-kit studio</code> in the course repo, open the URL it prints</td>
           </tr>
         </tbody>
       </table>
