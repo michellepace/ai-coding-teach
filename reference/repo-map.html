@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Reference: repo map of Cadence</title>
+    <link rel="stylesheet" href="../assets/course.css" />
+  </head>
+  <body>
+    <main class="page sheet">
+      <nav class="topbar">
+        <span>Cadence, explained</span>
+        <span class="topbar-links">
+          <a href="../lessons/0001-where-code-runs.html">Lesson 1: Where does this code run?</a>
+          <span>Reference:</span>
+          <a href="where-code-runs.html">where code runs</a>
+        </span>
+      </nav>
+
+      <header>
+        <p class="kicker">Reference sheet</p>
+        <h1>Repo map</h1>
+        <p class="lede">
+          What each file in <code>~/projects/others/ai-coding-crash-course/</code> is for, and
+          where its code runs.
+        </p>
+      </header>
+
+      <p>
+        Paths in <strong>bold</strong> appeared in lesson 1. The rest are here so you can look up
+        a file the moment a diff names it, and each will get its own lesson. For the journey a
+        page takes through these files, see
+        <a href="where-code-runs.html">where code runs</a>.
+      </p>
+
+      <h2>The app: <code>app/</code></h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Path</th>
+            <th>Holds</th>
+            <th>Runs</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <strong><code>app/routes.ts</code></strong>
+            </td>
+            <td>
+              The route table: every address Cadence answers to, paired with its route file. A
+              route file that is not listed here gives a 404.
+            </td>
+            <td><span class="lane" data-lane="server">Server</span></td>
+          </tr>
+          <tr>
+            <td>
+              <strong><code>app/routes/</code></strong>
+            </td>
+            <td>
+              Route files: 23 pages, one layout and four <code>api.*</code> files that answer
+              requests without showing a page. Each page file holds a <code>loader</code> and a
+              component.
+            </td>
+            <td>
+              <span class="lane" data-lane="server">Server</span> for <code>loader</code> and
+              <code>action</code>.<br />
+              <span class="lane" data-lane="server">Server</span> then
+              <span class="lane" data-lane="browser">Browser</span> for the component.
+            </td>
+          </tr>
+          <tr>
+            <td><code>app/routes/layout.app.tsx</code></td>
+            <td>
+              The frame around most pages: the sidebar and the DevUI panel. The home, login and
+              signup pages sit outside it.
+            </td>
+            <td>As any route file</td>
+          </tr>
+          <tr>
+            <td><code>app/root.tsx</code></td>
+            <td>The outermost HTML shell that every page is placed inside.</td>
+            <td>
+              <span class="lane" data-lane="server">Server</span> then
+              <span class="lane" data-lane="browser">Browser</span>
+            </td>
+          </tr>
+          <tr>
+            <td><code>app/components/</code></td>
+            <td>
+              Reusable pieces of a page, such as the sidebar and the DevUI panel.
+              <code>ui/</code> inside it holds the basic building blocks (button, card, input and
+              five more), copied in from shadcn/ui.
+            </td>
+            <td>
+              <span class="lane" data-lane="server">Server</span> then
+              <span class="lane" data-lane="browser">Browser</span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <strong><code>app/services/</code></strong>
+            </td>
+            <td>
+              Functions that read and write the database, one file per topic (users, courses,
+              quizzes and so on). Most have their tests beside them in a
+              <code>*.test.ts</code> file.
+            </td>
+            <td><span class="lane" data-lane="server">Server</span></td>
+          </tr>
+          <tr>
+            <td>
+              <strong><code>app/db/index.ts</code></strong>
+            </td>
+            <td>Opens <code>data.db</code> and hands out <code>db</code>, the connection the services use.</td>
+            <td><span class="lane" data-lane="server">Server</span></td>
+          </tr>
+          <tr>
+            <td><code>app/db/schema.ts</code></td>
+            <td>
+              The shape of every table: its name and its columns. Also the lists of allowed
+              values, such as the three user roles.
+            </td>
+            <td>
+              <span class="lane" data-lane="server">Server</span> and
+              <span class="lane" data-lane="browser">Browser</span>, because components import the
+              role names from it
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code>app/lib/session.ts</code><br />
+              <code>app/lib/validation.ts</code>
+            </td>
+            <td>
+              Who the current user is, kept in a cookie. Checks on what a form sent.
+            </td>
+            <td>
+              <span class="lane" data-lane="server">Server</span> by habit: only loaders and
+              actions use them, but nothing enforces it
+            </td>
+          </tr>
+          <tr>
+            <td><code>app/lib/*.server.ts</code></td>
+            <td>Working out a visitor's country. Turning Markdown text into HTML.</td>
+            <td>
+              <span class="lane" data-lane="server">Server</span>, enforced: the build refuses to
+              send a <code>.server</code> file to a browser
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code>app/lib/utils.ts</code><br />
+              <code>app/lib/ppp.ts</code>
+            </td>
+            <td>Small helpers with no secrets in them: formatting a price, regional pricing.</td>
+            <td>
+              <span class="lane" data-lane="server">Server</span> and
+              <span class="lane" data-lane="browser">Browser</span>
+            </td>
+          </tr>
+          <tr>
+            <td><code>app/app.css</code></td>
+            <td>The app's colours and styling set-up.</td>
+            <td><span class="lane" data-lane="browser">Browser</span></td>
+          </tr>
+          <tr>
+            <td><code>app/test/setup.ts</code></td>
+            <td>Builds a throwaway database in memory for each test.</td>
+            <td>Tests only</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout callout-quiet">
+        <p class="callout-title">A name is not a route</p>
+        <p>
+          File names like <code>courses.$slug.tsx</code> look as if they decide the address. They
+          do not. That file handles <code>/courses/:slug</code> only because a line in
+          <code>app/routes.ts</code> says so. A new route file does nothing until it is added
+          there.
+        </p>
+      </div>
+
+      <h2>Beside the app</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Path</th>
+            <th>Holds</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <strong><code>data.db</code></strong>
+            </td>
+            <td>
+              <span class="lane" data-lane="database">Database</span> The data itself: 17 tables
+              of rows. <code>data.db-wal</code> and <code>data.db-shm</code> belong to it, so
+              treat the three files as one. None of them is in git.
+            </td>
+          </tr>
+          <tr>
+            <td><code>drizzle/</code></td>
+            <td>
+              Migrations: numbered SQL files that build the tables one step at a time. Three so
+              far. <code>meta/</code> is the tool's own bookkeeping.
+            </td>
+          </tr>
+          <tr>
+            <td><code>scripts/seed.ts</code></td>
+            <td>The sample data: the users, courses and lessons you see in the app.</td>
+          </tr>
+          <tr>
+            <td><code>public/</code></td>
+            <td>Files sent to the browser exactly as they are: the icon and the course cover images.</td>
+          </tr>
+          <tr>
+            <td><code>.react-router/</code></td>
+            <td>
+              Generated type files, the target of every <code>./+types/…</code> import. Not in
+              git. The dev server and <code>npm run typecheck</code> recreate them.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code>react-router.config.ts</code><br />
+              <code>tsconfig.json</code><br />
+              <code>drizzle.config.ts</code>
+            </td>
+            <td>
+              Settings. The first turns on building pages on the server. The second is why
+              <code>~/</code> in an import means <code>app/</code>. The third tells the database
+              tool where the schema, the migrations and <code>data.db</code> are.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code>request-logger/</code><br />
+              <code>lessons/</code>
+            </td>
+            <td>
+              Not Cadence. A separate tool the course uses to record what Claude Code sends, and
+              your saved copies of the course lessons.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Commands</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Command</th>
+            <th>What it does</th>
+            <th>Changes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>npm run dev</code></td>
+            <td>
+              Starts the server at <code>localhost:5173</code>.
+              <kbd>Ctrl</kbd>+<kbd>C</kbd> stops it.
+            </td>
+            <td>Nothing</td>
+          </tr>
+          <tr>
+            <td><code>npm run db:generate</code></td>
+            <td>
+              Compares <code>app/db/schema.ts</code> with the migrations so far and writes a new
+              migration file into <code>drizzle/</code>.
+            </td>
+            <td>Code</td>
+          </tr>
+          <tr>
+            <td><code>npm run db:migrate</code></td>
+            <td>
+              Applies to <code>data.db</code> any migration files it has not had yet. The cure for
+              a <code>no such column</code> error.
+            </td>
+            <td><span class="lane" data-lane="database">Database</span> its tables</td>
+          </tr>
+          <tr>
+            <td><code>npm run db:seed</code></td>
+            <td>
+              Empties <code>data.db</code>, rebuilds its tables from the migrations and refills
+              the sample data. Anything you added through the app is gone.
+            </td>
+            <td><span class="lane" data-lane="database">Database</span> everything</td>
+          </tr>
+          <tr>
+            <td><code>npm run test</code></td>
+            <td>
+              Runs every test once. Tests use a throwaway database in memory, not your
+              <code>data.db</code>.
+            </td>
+            <td>Nothing</td>
+          </tr>
+          <tr>
+            <td><code>npm run typecheck</code></td>
+            <td>Regenerates the route types, then checks the types of the whole project.</td>
+            <td>Nothing you edit</td>
+          </tr>
+          <tr>
+            <td><code>npm run reset</code></td>
+            <td>
+              The course's own tool: rewinds your code to a lesson checkpoint. Uncommitted work is
+              lost. It does not touch <code>data.db</code>, so run <code>db:migrate</code> or
+              <code>db:seed</code> afterwards.
+            </td>
+            <td>Code</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>When the docs and the code disagree, trust the code</h2>
+
+      <ul>
+        <li>
+          The README says React Router <strong>v7</strong>. <code>package.json</code> installs
+          <strong>8.3.0</strong>, so read the docs at <code>reactrouter.com/8.3.0</code>.
+        </li>
+        <li>The README lists Ably for live presence. It is not installed.</li>
+        <li>
+          Tutorials fetch a loader's result with <code>useLoaderData()</code>. Cadence never
+          does: every component receives it as the <code>loaderData</code> prop.
+        </li>
+      </ul>
+
+      <h2>Sources</h2>
+
+      <ol class="sources">
+        <li>
+          The Cadence code on <code>main</code> at commit <code>90e09a1</code>, read on 6 November
+          2026. The counts on this page are for that commit, and the course's lessons add to
+          them.
+        </li>
+        <li>
+          React Router 8.3.0 documentation: <a href="https://reactrouter.com/8.3.0/start/framework/routing">Routing</a>,
+          <a href="https://reactrouter.com/8.3.0/start/framework/route-module">Route Module</a>,
+          <a href="https://reactrouter.com/8.3.0/api/framework-conventions/server-modules">.server modules</a>,
+          <a href="https://reactrouter.com/8.3.0/explanation/type-safety">Type Safety</a>.
+        </li>
+        <li>
+          SQLite, <a href="https://www.sqlite.org/tempfiles.html">Temporary Files</a>, sections 2.2
+          and 2.3, on the <code>-wal</code> and <code>-shm</code> files.
+        </li>
+        <li>shadcn/ui, <a href="https://ui.shadcn.com/docs">Introduction</a>.</li>
+        <li>
+          The course's "Database Migrations" and "How To Run the Exercises" lessons, in
+          <code>lessons/01-before-we-start/</code> of your course repo, for <code>reset</code> and
+          the three <code>db:</code> commands.
+        </li>
+      </ol>
+
+      <nav class="lesson-nav">
+        <a href="../lessons/0001-where-code-runs.html">Lesson 1: Where does this code run?</a>
+        <span>Reference: <a href="where-code-runs.html">where code runs</a></span>
+      </nav>
+    </main>
+  </body>
+</html>
