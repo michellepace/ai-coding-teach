@@ -5,6 +5,20 @@
       "Bash(explorer.exe *)"
     ]
   },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ \"$CLAUDE_CODE_REMOTE\" = true ]; then cd \"$CLAUDE_PROJECT_DIR\" && npm install --no-audit --no-fund > /dev/null || echo 'SessionStart: npm install failed, so Lefthook git hooks may be missing. Run npm install and report the error.'; fi",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  },
   "enabledPlugins": {
     "git-utils@my-claude-marketplace": true,
     "alwayson-misc@my-claude-marketplace": true
