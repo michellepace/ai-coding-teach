@@ -1,0 +1,13 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.6.4/schema.json",
+  "files": { "includes": ["**", "!**/*.md"] },
+  "formatter": { "indentStyle": "space" }, // biome's default is tab
+  "linter": {
+    "rules": {
+      "a11y": "off", // accessibility off: noisy, not lesson-breaking
+      "correctness": { "noUndeclaredVariables": "error" },
+      "nursery": { "noUndeclaredClasses": "error" },
+      "style": { "noDescendingSpecificity": "off" }
+    }
+  }
+}
