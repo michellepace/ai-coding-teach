@@ -9,5 +9,8 @@
       "nursery": { "noUndeclaredClasses": "error" },
       "style": { "noDescendingSpecificity": "off" }
     }
-  }
+  },
+  "overrides": [
+    { "includes": [".claude/settings.json"], "formatter": { "enabled": false } }
+  ]
 }
