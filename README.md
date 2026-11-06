@@ -1,6 +1,6 @@
 # Using the `/teach` skill to learn a codebase
 
-This repo is a teaching workspace for learning the [ai-coding-crash-course](https://github.com/ai-hero-dev/ai-coding-crash-course) repo. Matt Pocock's [`/teach` skill](https://github.com/mattpocock/skills/blob/main/skills/productivity/teach/SKILL.md) creates the lessons, reference sheets, and learning records here.
+This repo is a teaching workspace for learning the [ai-coding-crash-course](https://github.com/ai-hero-dev/ai-coding-crash-course) repo. Matt Pocock's [`/teach` skill](https://github.com/mattpocock/skills/blob/main/skills/productivity/teach/SKILL.md) creates the lessons, reference sheets, and learning records here. Read the lessons at [michellepace.github.io/ai-coding-teach](https://michellepace.github.io/ai-coding-teach/).
 
 *The prompt that starts lesson 1:*
 

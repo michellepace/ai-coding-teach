@@ -1,0 +1,436 @@
+# Verified resource list for the React Router 8.3.0 / SQLite / Drizzle course codebase
+
+Three version findings change which pages the student should read:
+
+- **React Router:** the docs describe v8 and are versioned per release. The unversioned URLs track latest (8.5.1 today); `https://reactrouter.com/8.3.0/...` matches the codebase exactly.
+- **Drizzle:** `orm.drizzle.team` now documents **v1 (release candidate)**, not the codebase's 0.45 / 0.31. Its migrations pages no longer describe the `_journal.json` layout the repo uses.
+- **Vitest:** the main docs are v5.1.0; the codebase's `^3.2.3` matches `v3.vitest.dev`.
+
+## How I verified
+
+- **Fetching:** every URL marked ✅ was fetched this session with WebFetch and/or a plain HTTP GET (curl, default user agent) and returned 200.
+- **Quotes:** each quote was matched as an exact, whitespace-insensitive substring of the live page text. Backticks mark text the page renders in code font.
+- **React Router quotes:** all were additionally matched against the docs markdown at git tag `react-router@8.3.0`, so they hold for the student's exact version.
+- **Time estimates:** mine, from page length, unless I say the page states one.
+- **Local repo checks (not web):** `package.json` confirms `react-router` 8.3.0, `drizzle-orm ^0.45.2`, `drizzle-kit ^0.31.4`, `vitest ^3.2.3`, `tailwindcss ^4.1.13`. `react-router.config.ts` has `ssr: true`.
+
+---
+
+## A. Client, server, HTTP
+
+**A1. ✅ https://developer.mozilla.org/en-US/docs/Learn_web_development/Getting_started/Web_standards/How_the_web_works**
+- Title: "How the web works - Learn web development | MDN". Publisher: MDN (Mozilla).
+- Covers clients vs servers, DNS, packets, an HTTP request and response, and URL parts. True beginner level. About 15 min.
+- "Clients are the typical web user's internet-connected devices (for example, your computer connected to your Wi-Fi, or your phone connected to your mobile network) and web-accessing software available on those devices (usually a web browser like Firefox or Chrome)."
+- "Servers are computers that store webpages, sites, or apps. When a client wants to access a webpage, a copy of the webpage code is downloaded from the server to the client machine, where it is rendered by the browser and displayed to the user."
+- "The browser sends an HTTP request message to the server, asking it to send a copy of the website to the client."
+- "If the server approves the client's request, the server sends the client a "200 OK" message, which means "Of course you can look at that website! Here it is", and then starts sending the website's files to the browser as a series of small chunks called packets."
+
+**A2. ✅ https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Server-side/First_steps/Client-Server_overview**
+- Title: "Client-server overview - Learn web development | MDN".
+- Walks through GET and POST request/response examples, static vs dynamic sites, and what a web framework does. Beginner, but denser than A1 (raw HTTP headers). About 20–25 min.
+- "Web browsers communicate with web servers using the HyperText Transfer Protocol (HTTP)."
+- "When you click a link on a web page, submit a form, or run a search, the browser sends an HTTP Request to the server."
+- "Web servers wait for client request messages, process them when they arrive, and reply to the web browser with an HTTP response message."
+- This page has no standalone one-sentence definition of "client" or "server"; use A1 for those.
+
+**A3. ✅ https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Server-side/First_steps/Introduction**
+- Title: "Introduction to the server side - Learn web development | MDN".
+- Explains what server-side code is for and why sites keep data in a database. Beginner. About 15–20 min.
+- "Code running in the browser is known as client-side code and is primarily concerned with improving the appearance and behavior of a rendered web page."
+- "By contrast, server-side website programming mostly involves choosing which content is returned to the browser in response to requests."
+- "Most of the code to support a dynamic website must run on the server. Creating this code is known as "server-side programming" (or sometimes "back-end scripting")."
+
+**A4. ✅ https://web.dev/articles/rendering-on-the-web**
+- Title: "Rendering on the web". Authors: Addy Osmani and Jason Miller (Google, web.dev). Published February 6, 2019; last updated 2026-01-05.
+- Intermediate. Assign only "Terminology", "Server-side rendering" and the rehydration section (about 8 min; whole article 15–20).
+- SSR: "Rendering an app on the server to send HTML, rather than JavaScript, to the client."
+- CSR: "Rendering an app in a browser, using JavaScript to modify the DOM."
+- Hydration: "Running client-side scripts to add application state and interactivity to server-rendered HTML."
+
+**A5. ✅ https://react.dev/reference/react-dom/client/hydrateRoot**
+- Title: "hydrateRoot – React". Publisher: React team.
+- A reference page, not a tutorial; assign only "Hydrating server-rendered HTML" (about 5 min).
+- "Call `hydrateRoot` to “attach” React to existing HTML that was already rendered by React in a server environment."
+- "Hydration turns the initial HTML snapshot from the server into a fully interactive app that runs in the browser."
+- "The React tree you pass to `hydrateRoot` needs to produce the same output as it did on the server."
+
+**A6. ✅ https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies**
+- Title: "Using HTTP cookies - HTTP | MDN".
+- The first two sections are beginner-friendly (about 8 min); the security sections are intermediate (about 20 min in full).
+- "A cookie (also known as a web cookie or browser cookie) is a small piece of data a server sends to a user's web browser. The browser may store cookies, create new cookies, modify existing ones, and send them back to the same server with later requests."
+- "Cookies enable web applications to store limited amounts of data and remember state information; by default the HTTP protocol is stateless."
+- "After receiving an HTTP request, a server can send one or more `Set-Cookie` headers with the response, each one of which will set a separate cookie."
+- React Router's own tie-in is B14 below.
+
+---
+
+## B. React Router v8, framework mode
+
+### Version questions
+
+- **Do the docs describe v8?** Yes. `https://reactrouter.com/home` is served from tag `react-router@8.5.1`; the changelog's top entry is v8.5.1 (2026-10-27).
+- **Are URLs versioned?** Yes. `https://reactrouter.com/8.3.0/<path>` serves the docs as of that release, with the banner "Viewing docs for an older release". Titles carry the version, e.g. "Route Module v8.3.0 | React Router". Every path below returned 200 in both forms. The selector also lists 7.18.5, 6.30.6 and `main (unreleased)`.
+- **Release dates (from the changelog):** v8.0.0 2026-06-17, v8.1.0 2026-06-29, v8.2.0 2026-07-08, v8.3.0 2026-07-22, v8.3.1 2026-08-27, v8.4.0 2026-09-15, v8.5.0 2026-10-19.
+
+### What changed v7 to v8
+
+**✅ https://reactrouter.com/8.3.0/changelog** (latest: ✅ https://reactrouter.com/changelog)
+- "If you've adopted all active future flags in v7, then from a React Router API surface you're in good shape for v8."
+- "We have now dropped `react-router-dom`, so if you didn't get around to swapping your imports in v7, you will need to swap them to `react-router` and `react-router/dom` for v8."
+- "Use `loaderData` instead of `data` on `MetaArgs` and each item in `MetaArgs.matches`."
+- "To modernize the library, React Router is now published as an ESM-only module"
+- Minimums listed: "Node 22.22.0+", "React 19.2.7+", "Vite 7+". Middleware: "middleware is now always enabled".
+- The 8.3.0 entry itself is mostly unstable RSC work and small fixes; nothing a beginner needs.
+
+**✅ https://remix.run/blog/react-router-v8**
+- Title: "React Router v8 | Remix". Author: Brooks Lybrand. Dated June 17, 2026. About 6 min.
+- "The breaking changes for v8 are quite minimal, and all of them are changes you can make in v7."
+- "we are officially marking React Router v6 and Remix v2 as End of Life (EOL)"
+
+**✅ https://reactrouter.com/8.3.0/upgrading/v7**
+- Title: "Updating from v7". For the teacher; a beginner can skip it.
+- "In v8, you should import DOM-specific APIs from `react-router/dom` and everything else from `react-router`."
+
+**Practical upshot for the student:**
+- v7 framework-mode tutorials still apply almost unchanged.
+- Any tutorial that imports from `react-router-dom` is out of date.
+- `meta` receives `loaderData`, not `data`.
+- Middleware and `context` are always on.
+
+### Official pages
+
+All ✅. Pinned URLs given; drop `/8.3.0` for latest. Publisher: React Router / Remix team. Each is a 3–10 min read and beginner-accessible unless noted.
+
+**B1. Picking a Mode: https://reactrouter.com/8.3.0/start/modes**
+- "Framework Mode wraps Data Mode with a Vite plugin to add the full React Router experience with:"
+- "The features available in each mode are additive, so moving from Declarative to Data to Framework simply adds more features at the cost of architectural control."
+- Under "Use Framework Mode if you:", the first item is "are too new to have an opinion".
+
+**B2. Routing: https://reactrouter.com/8.3.0/start/framework/routing**
+- "Routes are configured in `app/routes.ts`. Each route has two required parts: a URL pattern to match the URL, and a file path to the route module that defines its behavior."
+- "Child routes are rendered through the `<Outlet/>` in the parent route."
+- "If a path segment starts with `:` then it becomes a "dynamic segment"."
+- Reference companion: https://reactrouter.com/8.3.0/api/framework-conventions/routes.ts ("Configuration file that maps URL patterns to route modules in your application.")
+
+**B3. Route Module: https://reactrouter.com/8.3.0/start/framework/route-module** (the single most important page)
+- "The files referenced in `routes.ts` are called Route Modules."
+- Component: "The `default` export in a route module defines the component that will render when the route matches."
+- `loader`: "Route loaders provide data to route components before they are rendered. They are only called on the server when server rendering or during the build with pre-rendering."
+- `action`: "Route actions allow server-side data mutations with automatic revalidation of all loader data on the page when called from `<Form>`, `useFetcher`, and `useSubmit`."
+- `ErrorBoundary`: "When other route module APIs throw, the route module `ErrorBoundary` will render instead of the route component."
+- `meta`: "Route meta defines meta tags to be rendered in the `<Meta />` component, usually placed in the `<head>`."
+- Also on `meta`: "Since React 19, using the built-in `<meta>` element is recommended over the use of the route module's `meta` export."
+
+**B4. Data Loading: https://reactrouter.com/8.3.0/start/framework/data-loading**
+- "Data is provided to the route component from `loader` and `clientLoader`."
+- "When server rendering, `loader` is used for both initial page loads and client navigations. Client navigations call the loader through an automatic `fetch` by React Router from the browser to your server."
+- "Note that the `loader` function is removed from client bundles so you can use server only APIs without worrying about them being included in the browser."
+
+**B5. Actions: https://reactrouter.com/8.3.0/start/framework/actions**
+- "Data mutations are done through Route actions. When the action completes, all loader data on the page is revalidated to keep your UI in sync with the data without writing any code to do it."
+- "Route actions defined with `action` are only called on the server while actions defined with `clientAction` are run in the browser."
+- "Server actions only run on the server and are removed from client bundles."
+- "Actions are called declaratively through `<Form>` and imperatively through `useSubmit` (or `<fetcher.Form>` and `fetcher.submit`) by referencing the route's path and a "post" method."
+
+**B6. `<Form>`: https://reactrouter.com/8.3.0/api/components/Form**
+- "A progressively enhanced HTML `<form>` that submits data to actions via `fetch`"
+- "Because it uses the HTML form API, server rendered pages are interactive at a basic level before JavaScript loads."
+- "After JavaScript loads, React Router takes over enabling web application user experiences."
+
+**B7. `useFetcher`: https://reactrouter.com/8.3.0/api/hooks/useFetcher** (terse reference), plus the guide **https://reactrouter.com/8.3.0/how-to/fetchers** and **https://reactrouter.com/8.3.0/explanation/form-vs-fetcher**
+- "Fetchers are useful for creating complex, dynamic user interfaces that require multiple, concurrent data interactions without causing a navigation."
+- "Fetchers track their own, independent state and can be used to load data, mutate data, submit forms, and generally interact with loaders and actions."
+- From form-vs-fetcher: "The primary criterion when choosing among these tools is whether you want the URL to change or not:"
+
+**B8. Rendering Strategies: https://reactrouter.com/8.3.0/start/framework/rendering**
+- "There are three rendering strategies in React Router:" (Client Side Rendering, Server Side Rendering, Static Pre-rendering)
+- "Routes are always client side rendered as the user navigates around the app."
+- "Server side rendering requires a deployment that supports it. Though it's a global setting, individual routes can still be statically pre-rendered."
+- This page never says "render on the server, then hydrate"; B9 does.
+- Config reference: https://reactrouter.com/8.3.0/api/framework-conventions/react-router.config.ts ("If `true`, React Router will server render your application." and "Defaults to `true`.")
+
+**B9. Server render then hydrate: https://reactrouter.com/8.3.0/api/framework-conventions/entry.server.tsx and https://reactrouter.com/8.3.0/api/framework-conventions/entry.client.tsx**
+- Reference-level, but the key sentences are plain.
+- Server entry: "This file is the server-side entry point that controls how your React Router application generates HTTP responses on the server."
+- Server entry: "This module should render the markup for the current page using a `<ServerRouter>` element with the `context` and `url` for the current request. This markup will (optionally) be re-hydrated once JavaScript loads in the browser using the client entry module."
+- Client entry: "This file is the entry point for the browser and is responsible for hydrating the markup generated by the server in your server entry module"
+- Client entry: "By default, React Router will handle hydrating your app on the client for you."
+- Also https://reactrouter.com/8.3.0/api/framework-routers/HydratedRouter: "Framework-mode router component to be used to hydrate a router from a `ServerRouter`"
+
+**B10. `.server` modules: https://reactrouter.com/8.3.0/api/framework-conventions/server-modules**
+- "Server-only modules that are excluded from client bundles and only run on the server."
+- "`.server` modules are a good way to explicitly mark entire modules as server-only. The build will fail if any code in a `.server` file or `.server` directory accidentally ends up in the client module graph."
+- "Mark individual files as server-only by adding `.server` to the filename:"
+- "Route modules should not be marked as `.server` or `.client` as they have special handling and need to be referenced in both server and client module graphs."
+
+**B11. How server code leaves the bundle: https://reactrouter.com/8.3.0/explanation/code-splitting**
+- "Any server-only Route Module APIs will be removed from the bundles."
+- "After building for the browser, only the `Component` will still be in the bundle, so you can use server-only code in the other module exports."
+- The prose does not name `loader`/`action`/`headers`; they appear only in the code example.
+
+**B12. Type safety: https://reactrouter.com/8.3.0/explanation/type-safety and https://reactrouter.com/8.3.0/how-to/route-module-type-safety**
+- "React Router generates types for each route in your app to provide type safety for the route module exports."
+- "It then generates a `+types/<route file>.d.ts` for each route within a special `.react-router/types/` directory."
+- "With `rootDirs` configured, TypeScript can import these generated files as if they were right next to their corresponding route modules."
+- Example import shown on the page: `import type { Route } from "./+types/product";`
+
+**B13. Pending UI: https://reactrouter.com/8.3.0/start/framework/pending-ui**
+- "When the user navigates to a new route, or submits data to an action, the UI should immediately respond to the user's actions with a pending or optimistic state. Application code is responsible for this."
+- "When the user navigates to a new url, the loaders for the next page are awaited before the next page renders. You can get the pending state from `useNavigation`."
+
+**B14. Sessions and Cookies: https://reactrouter.com/8.3.0/explanation/sessions-and-cookies**
+- "Sessions are an important part of websites that allow the server to identify requests coming from the same person"
+- "A cookie is a small piece of information that your server sends someone in a HTTP response that their browser will send back on subsequent requests."
+
+**B15. Error boundaries: https://reactrouter.com/8.3.0/how-to/error-boundary**
+- "To avoid rendering an empty page to users, route modules will automatically catch errors in your code and render the closest `ErrorBoundary`."
+
+**B16. Address Book tutorial: https://reactrouter.com/8.3.0/tutorials/address-book**
+- The page states its own time: "We expect it to take 30-45m if you're following along".
+- Starts with `ssr: false` and `clientLoader`, then switches to SSR, so it shows both sides.
+- "Client side routing allows our app to update the URL without reloading the entire page."
+- "Let's switch to using `loader`, which (you guessed it) is used to fetch data on the server."
+- "We can provide a fallback that will show up before the app is hydrated (rendering on the client for the first time) with a `HydrateFallback` export."
+
+### The four claims you asked for
+
+1. **Where `loader` and `action` run:** B3 ("They are only called on the server when server rendering or during the build with pre-rendering.") and B5 ("Route actions defined with `action` are only called on the server while actions defined with `clientAction` are run in the browser.").
+2. **Server-only code is removed from the client bundle:** B4 ("the `loader` function is removed from client bundles…"), B5 ("Server actions only run on the server and are removed from client bundles."), and B11.
+3. **What `.server` modules are:** B10.
+4. **SSR renders on the server, then hydrates in the browser:** B9, backed by B6. No single sentence in the React Router docs states this for route components in general; B9 is the closest official wording. Pair it with A4/A5 for the concept.
+
+---
+
+## C. React fundamentals (react.dev "Learn")
+
+All ✅. Publisher: React team (Meta and community). Written for first-timers, with in-browser sandboxes. About 15–25 min each to read, 30–45 with challenges.
+
+| URL | Title | Key quote |
+|---|---|---|
+| https://react.dev/learn | Quick Start | "Welcome to the React documentation! This page will give you an introduction to 80% of the React concepts that you will use on a daily basis." |
+| https://react.dev/learn/your-first-component | Your First Component | "a React component is a JavaScript function that you can sprinkle with markup." |
+| https://react.dev/learn/writing-markup-with-jsx | Writing Markup with JSX | "JSX is a syntax extension for JavaScript that lets you write HTML-like markup inside a JavaScript file." |
+| https://react.dev/learn/passing-props-to-a-component | Passing Props to a Component | "React components use props to communicate with each other. Every parent component can pass some information to its child components by giving them props." |
+| https://react.dev/learn/conditional-rendering | Conditional Rendering | "In React, you can conditionally render JSX using JavaScript syntax like `if` statements, `&&`, and `? :` operators." |
+| https://react.dev/learn/rendering-lists | Rendering Lists | "Keys tell React which array item each component corresponds to, so that it can match them up later." |
+| https://react.dev/learn/responding-to-events | Responding to Events | "React lets you add event handlers to your JSX. Event handlers are your own functions that will be triggered in response to interactions like clicking, hovering, focusing form inputs, and so on." |
+| https://react.dev/learn/state-a-components-memory | State: A Component's Memory | "Components need to “remember” things: the current input value, the current image, the shopping cart. In React, this kind of component-specific memory is called state." |
+| https://react.dev/learn/thinking-in-react | Thinking in React | "This is called one-way data flow because the data flows down from the top-level component to the ones at the bottom of the tree." |
+
+Two extra quotes worth having:
+- Quick Start: "React apps are made out of components. A component is a piece of the UI (user interface) that has its own logic and appearance."
+- State: "Local variables don’t persist between renders." and "Changes to local variables won’t trigger renders."
+
+In this codebase most data arrives through `loader` and `loaderData`, not `useState` plus fetching. The props and state pages still apply, but the student will not see client-side data fetching.
+
+---
+
+## D. Databases, SQL, SQLite, Drizzle
+
+### D1. Intro to relational databases and SQL
+
+**Recommended first: ✅ https://sqlbolt.com/**
+- Title: "SQLBolt - Learn SQL - Introduction to SQL". Publisher: SQLBolt; no named author, which is a small trust caveat.
+- Interactive in-browser exercises; the most beginner-friendly option I found. Lessons 1–6 and 13–16 take about 2–3 hours (10–15 min each).
+- "SQL, or Structured Query Language, is a language designed to allow both technical and non-technical users to query, manipulate, and transform data from a relational database."
+- "A relational database represents a collection of related (two-dimensional) tables. Each of the tables are similar to an Excel spreadsheet, with a fixed number of named columns (the attributes or properties of the table) and any number of rows of data."
+- ✅ https://sqlbolt.com/lesson/select_queries_with_joins: "Tables that share information about a single entity need to have a primary key that identifies that entity uniquely across the database."
+- Same page: "The INNER JOIN is a process that matches rows from the first table and the second table which have the same key (as defined by the ON constraint) to create a result row with the combined columns from both tables."
+- Gap: the JOIN lessons never use the term "foreign key"; it appears only in the "Creating tables" lesson.
+- Also fetched: ✅ https://sqlbolt.com/lesson/select_queries_introduction.
+
+**Recommended second, for keys and relationships: ✅ https://cs50.harvard.edu/sql/**
+- Title: "CS50's Introduction to Databases with SQL". Instructors: Carter Zenke and David J. Malan (Harvard). Free, and it uses SQLite.
+- Assign only the notes for weeks 0 and 1, about 30–40 min each. I did not verify the lecture video lengths.
+- ✅ https://cs50.harvard.edu/sql/notes/0/: "A database is a way of organizing data such that you can perform four operations on it" and "Every row in a table stores one item in that set"
+- ✅ https://cs50.harvard.edu/sql/notes/1/: "In database terms, the ISBN is a primary key — an identifier that is unique for every item in a table."
+- Same page: "A foreign key is a primary key taken from a different table." and (on JOIN) "This keyword allows us to combine two or more tables together."
+
+**Evaluated, not recommended as primary:**
+- ❌ https://www.khanacademy.org/computing/computer-programming/sql : fetched twice, but only a JavaScript shell came back with no course content. I cannot confirm what it covers.
+- ✅ https://www.sqlitetutorial.net/ ("SQLite Tutorial - An Easy Way to Master SQLite Fast"): an independent site, not affiliated with sqlite.org. Broad and reference-like; fine for lookups, not a first course.
+- ✅ https://developer.mozilla.org/en-US/docs/Glossary/SQL and ✅ https://developer.mozilla.org/en-US/docs/Glossary/Database : one-paragraph glossary entries only. MDN has no beginner SQL course. Usable definition: "A database is a storage system that collects organized data, making it easier to search, structure, and extend."
+
+### D2. sqlite.org
+
+All ✅, official, plain HTML.
+
+**https://www.sqlite.org/about.html** ("About SQLite", about 3 min)
+- "SQLite is an in-process library that implements a self-contained, serverless, zero-configuration, transactional SQL database engine."
+- "SQLite is an embedded SQL database engine. Unlike most other SQL databases, SQLite does not have a separate server process. SQLite reads and writes directly to ordinary disk files. A complete SQL database with multiple tables, indices, triggers, and views, is contained in a single disk file."
+
+**https://www.sqlite.org/serverless.html** ("SQLite Is Serverless", about 3 min; the clearest for this student)
+- "Most SQL database engines are implemented as a separate server process."
+- "With SQLite, the process that wants to access the database reads and writes directly from the database files on disk. There is no intermediary server process."
+
+**https://www.sqlite.org/whentouse.html** ("Appropriate Uses For SQLite", 10–15 min)
+- "SQLite does not compete with client/server databases. SQLite competes with fopen()."
+- "SQLite works great as the database engine for most low to medium traffic websites (which is to say, most websites)."
+
+**https://www.sqlite.org/wal.html** ("Write-Ahead Logging"; technical, assign sections 1–2 only, about 8 min)
+- "The WAL approach inverts this. The original content is preserved in the database file and the changes are appended into a separate WAL file."
+- "WAL provides more concurrency as readers do not block writers and a writer does not block readers. Reading and writing can proceed concurrently."
+- "There is an additional quasi-persistent "-wal" file and "-shm" shared memory file associated with each database"
+- "Unlike the other journaling modes, PRAGMA journal_mode=WAL is persistent."
+
+**https://www.sqlite.org/tempfiles.html** ("Temporary Files Used By SQLite", sections 2.2–2.3, about 3 min; the best plain description of the two files)
+- "The WAL file is always located in the same directory as the database file and has the same name as the database file except with the 4 characters "-wal" appended."
+- "The shared-memory file, if it exists, is located in the same directory as the database file and has the same name as the database file except with the 4 characters "-shm" appended."
+- "The shared-memory file contains no persistent content."
+
+Local repo: `app/db/index.ts` sets `journal_mode = WAL`, and `data.db`, `data.db-wal` and `data.db-shm` sit in the repo root.
+
+### D3. Drizzle ORM
+
+**Version mismatch.** The current docs install `drizzle-orm@rc` and include an "Upgrade to v1.0" section. I found no versioned 0.x docs site. Two things differ from the codebase:
+
+1. **Migrations layout.** Current docs show one timestamped folder per migration holding `migration.sql` and `snapshot.json`. The repo has the 0.x layout: `drizzle/0000_*.sql` plus `drizzle/meta/_journal.json` and `drizzle/meta/000N_snapshot.json`.
+   - ✅ https://orm.drizzle.team/docs/upgrade-v1 lists the change as "removing `journal.json`" and "grouping SQL files and snapshots into separate migration folders".
+2. **Relational query API.** The current page documents v2 (`defineRelations`).
+   - ✅ https://orm.drizzle.team/docs/v0-v1-changes : "RQBv1 has been removed. Use Relational Queries v2 with the new `defineRelations()` API instead"
+   - Local repo: a grep of `app/` found no `db.query.` or `relations(` calls. The codebase uses only the SQL-like API, so this topic can be skipped.
+
+The init call also differs: the repo has the 0.x form `drizzle(getSqlite(), { schema })`, while current docs show `drizzle({ client: sqlite })`.
+
+**Use the SQLite variants.** `https://orm.drizzle.team/docs/sqlite/<page>` shows `sqliteTable` examples; the unprefixed pages default to PostgreSQL.
+
+All ✅, publisher Drizzle Team. Intermediate; readable after D1.
+
+- **What Drizzle is: https://orm.drizzle.team/docs/overview** ("Drizzle ORM - Why Drizzle?", about 5 min)
+  - "Drizzle ORM is a headless TypeScript ORM with a head."
+  - "If you know SQL, you know Drizzle."
+  - "Other ORMs and data frameworks tend to deviate/abstract you away from SQL, which leads to a double learning curve: needing to know both SQL and the framework’s API."
+- **SQLite + better-sqlite3: https://orm.drizzle.team/docs/sqlite/get-started-sqlite** ("Drizzle ORM - SQLite")
+  - "Drizzle has native support for SQLite connections with the `libsql`, `node:sqlite` and `better-sqlite3` drivers."
+  - Shows `const sqlite = new Database('sqlite.db');` then `const db = drizzle({ client: sqlite });` (v1 syntax).
+  - The step-by-step ✅ https://orm.drizzle.team/docs/get-started/sqlite-new uses libsql, not better-sqlite3, so it is a poor match.
+- **Schema: https://orm.drizzle.team/docs/sqlite/sql-schema-declaration** ("Drizzle ORM - Schema", about 10 min)
+  - "Drizzle lets you define a schema in TypeScript with various models and properties supported by the underlying database. When you define your schema, it serves as the source of truth for future modifications in queries (using Drizzle-ORM) and migrations (using Drizzle-Kit)."
+  - Companions: ✅ https://orm.drizzle.team/docs/sqlite/column-types ("SQLite does not have native boolean data type, yet you can specify integer column to be in a boolean mode.")
+  - ✅ https://orm.drizzle.team/docs/sqlite/indexes-constraints ("The PRIMARY KEY constraint uniquely identifies each record in a table." and "The FOREIGN KEY constraint is used to prevent actions that would destroy links between tables.")
+- **Queries:**
+  - ✅ https://orm.drizzle.team/docs/sqlite/select : "Drizzle provides you the most SQL-like way to fetch data from your database, while remaining type-safe and composable."
+  - ✅ https://orm.drizzle.team/docs/sqlite/insert : "Drizzle ORM provides you the most SQL-like way to insert rows into the database tables."
+  - ✅ https://orm.drizzle.team/docs/sqlite/update : "Values of `undefined` are ignored in the object: to set a column to `null`, pass `null`."
+  - ✅ https://orm.drizzle.team/docs/sqlite/delete : "You can delete all rows in the table:" and "And you can delete with filters and conditions:"
+  - ✅ https://orm.drizzle.team/docs/sqlite/joins : "Join clause in SQL is used to combine 2 or more tables, based on related columns between them."
+  - Overview of both styles: ✅ https://orm.drizzle.team/docs/sqlite/data-querying
+- **Relational query API (v2 only): https://orm.drizzle.team/docs/sqlite/rqb** ("Drizzle ORM - Query")
+  - "Relational queries are meant to provide you with a great developer experience for querying nested relational data from an SQL database, avoiding multiple joins and complex data mappings."
+  - 0.x syntax appears in the "Before" blocks of ✅ https://orm.drizzle.team/docs/relations-v1-v2.
+  - The pre-v1 page is in docs-repo history: ✅ https://github.com/drizzle-team/drizzle-orm-docs/blob/926ce90ecb9e025b70d90801115477f120634116/src/content/docs/rqb.mdx (commit dated 2025-09-09).
+- **Migrations concept: https://orm.drizzle.team/docs/sqlite/migrations** ("Drizzle ORM - Migrations")
+  - "SQL databases require you to specify a strict schema of entities you’re going to store upfront and if (when) you need to change the shape of those entities - you will need to do it via schema migrations."
+  - "Codebase first is when database schema in your codebase is a source of truth and is under version control."
+  - The repo's `db:generate` / `db:migrate` scripts are "Option 3" on this page.
+- **`generate`: https://orm.drizzle.team/docs/sqlite/drizzle-kit-generate**
+  - "`drizzle-kit generate` lets you generate SQL migrations based on your Drizzle schema upon declaration or on subsequent schema changes."
+  - The folder tree shown is the v1 layout; the page does not mention `_journal.json`.
+- **`migrate`: https://orm.drizzle.team/docs/sqlite/drizzle-kit-migrate**
+  - "Upon running migrations Drizzle Kit will persist records about successfully applied migrations in your database. It will store them in migrations log table named `__drizzle_migrations`."
+  - "Based on previously applied migrations it will decide which new migrations to run"
+- **Kit overview: https://orm.drizzle.team/docs/sqlite/kit-overview** : "Drizzle Kit is a CLI tool for managing SQL database migrations with Drizzle."
+
+**How the journal works in 0.45 / 0.31.** I found no official prose docs for it, including in the pre-v1 docs source, which only draws a `_meta` folder. The primary sources that exist are teacher-level, not for the student:
+
+- ✅ https://github.com/drizzle-team/drizzle-orm/discussions/2832 ("Migrations folder structure v3", by maintainer AlexBlokh, August 23, 2024). It shows the old tree with `meta/_journal.json` and says: "We have a journal which keeps track of migration snapshots as a linked list".
+- ✅ https://raw.githubusercontent.com/drizzle-team/drizzle-orm/0.45.2/drizzle-orm/src/migrator.ts (source at tag 0.45.2).
+  - `readMigrationFiles` reads `meta/_journal.json`, throws `Can't find meta/_journal.json file` if it is missing, and loads `<tag>.sql` for each journal entry.
+  - It splits each file on `--> statement-breakpoint` and takes a sha256 hash of the SQL.
+- ✅ https://raw.githubusercontent.com/drizzle-team/drizzle-orm/0.45.2/drizzle-orm/src/sqlite-core/dialect.ts (same tag).
+  - `migrate()` creates `__drizzle_migrations` (`id`, `hash`, `created_at`) if absent and reads the most recent row.
+  - It runs every migration whose journal `when` timestamp is newer than that row.
+
+---
+
+## E. Styling and tests
+
+**✅ https://tailwindcss.com/docs/styling-with-utility-classes**
+- Title: "Styling with utility classes - Core concepts - Tailwind CSS". Publisher: Tailwind Labs. Docs show v4.3 (same major as the codebase).
+- Beginner-friendly given basic CSS. The Overview takes about 5 min; the whole page about 20.
+- "You style things with Tailwind by combining many single-purpose presentational classes (utility classes) directly in your markup:"
+
+**✅ https://ui.shadcn.com/docs**
+- Title: "Introduction - shadcn/ui". About 5 min. Conceptual, fine for a beginner.
+- "This is not a component library. It is how you build your component library."
+- "shadcn/ui hands you the actual component code."
+
+**✅ https://v3.vitest.dev/guide/**
+- Title: "Getting Started | Guide | Vitest" (nav shows v3.2.7; the page flags itself as an old version). About 10 min.
+- ✅ https://vitest.dev/guide/ is v5.1.0 and requires "Vite >=v6.4.0 and Node >=v22.12.0"; use the v3 URL.
+- "Vitest (pronounced as "veetest") is a next generation testing framework powered by Vite."
+- "By default, tests must contain `.test.` or `.spec.` in their file name."
+
+---
+
+## F. Communities
+
+Invite links were checked against Discord's public invite endpoint. I cannot read channel content or server rules inside any Discord.
+
+**Reactiflux (React)**
+- ✅ https://www.reactiflux.com/ : "We’re a chat community of 75,416 React JS, React Native, Redux, Jest, Relay and GraphQL developers." and "Come chat about tech related to React & JavaScript or ask for help!"
+- Join: https://discord.gg/reactiflux redirects to https://discord.com/invite/reactiflux. Valid: server "Reactiflux", about 75k members, non-expiring. Also linked from ✅ https://react.dev/community.
+- Etiquette, ✅ https://www.reactiflux.com/tips ("Get Better Help · Reactiflux"):
+  - "nobody can help you until you state what your problem is"
+  - "If you don't see any, don't hesitate to post it in #help-react."
+  - "it's entirely possible that you won't get a response for an hour or more"
+- ✅ https://www.reactiflux.com/conduct commits to a welcoming environment "regardless of level of experience". No rule restricts beginner questions.
+- ✅ https://www.reactiflux.com/learning is a curated learning list by Mark Erikson.
+
+**React Router / Remix Discord**
+- ✅ https://remix.run/discord (linked from the reactrouter.com docs) returns a 302 to https://discord.com/invite/xwx7mMzVkA. Valid: server "Remix", about 23.7k members.
+- Beginner rules and channels: not verifiable.
+- Verified public alternative: ✅ https://github.com/remix-run/react-router/discussions, which has a Q&A category.
+
+**Drizzle Discord**
+- https://discord.gg/yfjTbVXMW4 (linked from ✅ https://orm.drizzle.team/). Valid: server "Drizzle Team", about 11.7k members.
+- Server description: "The official Discord for all Drizzle related projects, such as Drizzle ORM, Drizzle Kit, Drizzle Studio and more!" The invite lands in a `rules` channel.
+- Rules content: not verifiable.
+- Expect answers to assume v1; the student should state they are on 0.45.
+
+**r/reactjs**
+- ❌ https://www.reddit.com/r/reactjs/ : WebFetch cannot fetch reddit.com, so the rules, flairs and any beginner thread are unverified.
+- The only thing I confirmed is that ✅ https://react.dev/community links it as "Reddit’s React community".
+
+**AI Hero / AI Coding Crash Course (Matt Pocock)**
+- ✅ https://www.aihero.dev/workshops/ai-coding-crash-course : title "AI Coding Crash Course", by Matt Pocock.
+  - "Ship faster than ever before by taking control of your code, with software engineering fundamentals."
+  - "This Crash Course is completely self-paced"
+  - The public curriculum sidebar lists a lesson "Navigating The Discord".
+  - This page contains a block addressed to AI agents (MCP and token instructions); I ignored it.
+- ✅ https://github.com/ai-hero-dev/ai-coding-crash-course : public exercise repo. Issues are enabled (37 shown); there is no Discussions tab.
+- **Course Discord, partly verified.** https://www.aihero.dev/discord gave inconsistent results: WebFetch got 404, while a plain curl GET got 200 with the title "Join AI Hero Discord" and the text "Sign in with email before you link Discord." I found no public invite code.
+  - The lesson page is gated behind sign-in.
+  - The description below comes from the local scraped copy, not the web: `/home/mp/projects/others/ai-coding-crash-course/lessons/01-before-we-start/09-navigating-the-discord.md`.
+  - It says the top channels are open to everyone ("You do not need to have bought anything to read or post there.").
+  - Purchasers get `#crash-course-general`, `#crash-course-random` and `#crash-course-questions`.
+  - `#crash-course-questions` is "for questions about specific lessons" and is a forum channel with one post per question.
+  - This is the most relevant community for the student. Its scope is the course and AI coding, not React Router or Drizzle specifically.
+- Adjacent: https://www.mattpocock.com/discord redirects to https://discord.gg/8S5ujhfTB3 (server "Matt's TS Wizards", about 5.9k members). It is TypeScript-focused, and I found nothing linking it to this course.
+
+---
+
+## Primary source per topic
+
+- **A. Client/server/HTTP:** MDN "How the web works" (A1). For SSR and hydration: web.dev "Rendering on the web", Terminology section (A4).
+- **B. React Router v8:** "Route Module" pinned to 8.3.0 (B3), read after "Routing" (B2), with the Address Book tutorial (B16) as the hands-on companion.
+- **C. React:** react.dev "Quick Start", then the eight Learn pages in the order listed.
+- **D. Databases/SQL:** SQLBolt for doing; CS50 SQL notes for weeks 0–1 for primary and foreign keys.
+- **D. SQLite:** sqlite.org "SQLite Is Serverless" plus "About SQLite"; `tempfiles.html` sections 2.2–2.3 for the `-wal` and `-shm` files.
+- **D. Drizzle:** `orm.drizzle.team/docs/sqlite/sql-schema-declaration` and `/docs/sqlite/select`, with the v1-vs-0.45 caveat stated up front.
+- **E.** Tailwind "Styling with utility classes"; shadcn/ui "Introduction"; Vitest v3 "Getting Started".
+- **F.** The AI Hero Discord `#crash-course-questions` for course questions; Reactiflux `#help-react` for React; the Remix Discord for React Router.
+
+## Could not find or verify
+
+1. **Khan Academy "Intro to SQL":** the page returns only a JavaScript shell; content, instructor and structure are unverified.
+2. **r/reactjs:** not fetchable; rules and beginner policy unverified.
+3. **Discord server rules** for Remix, Drizzle and AI Hero: unreadable from outside. I confirmed only that the three invites are valid, plus server names and approximate member counts.
+4. **AI Hero Discord invite:** no public invite code found; joining appears to need an aihero.dev sign-in. The channel description comes from a local file scraped 2026-11-01, not a page I could fetch.
+5. **Official Drizzle docs for 0.45 / drizzle-kit 0.31:** no versioned docs site found. The `_journal.json` mechanism has no official prose documentation that I could find; only the GitHub discussion and source code above.
+6. **Which docs-repo commit matches 0.45.2:** the pre-v1 snapshot I cite (`926ce90`, 2025-09-09) shows 0.x syntax, but I did not establish that it corresponds exactly to 0.45.2.
+7. **A single official React Router sentence saying route components render on the server and then hydrate:** not found. B9 and B6 are the closest.
+8. **CS50 SQL lecture video lengths:** not checked.
+9. **Authorship of SQLBolt:** no named author on the site.
+10. **web.archive.org:** not fetchable with WebFetch, so I could not use archived copies of the older Drizzle docs.

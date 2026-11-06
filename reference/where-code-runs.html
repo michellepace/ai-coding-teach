@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Reference: where code runs in Cadence</title>
+    <link rel="stylesheet" href="../assets/course.css" />
+  </head>
+  <body>
+    <main class="page sheet">
+      <nav class="topbar">
+        <span>Cadence, explained</span>
+        <span class="topbar-links">
+          <a href="../lessons/0001-where-code-runs.html">Lesson 1: Where does this code run?</a>
+          <span>Reference:</span>
+          <a href="repo-map.html">repo map</a>
+        </span>
+      </nav>
+
+      <header>
+        <p class="kicker">Reference sheet</p>
+        <h1>Where code runs in Cadence</h1>
+        <p class="lede">Code runs in two places. Data lives in a third. All three are on your machine.</p>
+      </header>
+
+      <div class="cards">
+        <section class="card" data-lane="browser">
+          <h3>Browser</h3>
+          <p>Shows the page and reacts to clicks. The docs call it the <em>client</em>.</p>
+          <ul>
+            <li>In Cadence: the tab at <code>localhost:5173</code></li>
+            <li>Its console: <kbd>F12</kbd>, then Console</li>
+            <li>What it was sent: <kbd>Ctrl</kbd>+<kbd>U</kbd></li>
+          </ul>
+        </section>
+        <section class="card" data-lane="server">
+          <h3>Server</h3>
+          <p>Waits for requests and answers them.</p>
+          <ul>
+            <li>In Cadence: the program <code>npm run dev</code> starts</li>
+            <li>Its console: the terminal it runs in</li>
+            <li>Stop it: <kbd>Ctrl</kbd>+<kbd>C</kbd></li>
+          </ul>
+        </section>
+        <section class="card" data-lane="database">
+          <h3>Database</h3>
+          <p>Where the data rests, running or not.</p>
+          <ul>
+            <li>In Cadence: the file <code>data.db</code> in the repo root</li>
+            <li>Not in git. Only the server opens it</li>
+            <li>Rebuild the sample data: <code>npm run db:seed</code></li>
+          </ul>
+        </section>
+      </div>
+
+      <h2>Where does it run?</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Runs</th>
+            <th>Why</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>A <code>loader</code> in <code>app/routes/*.tsx</code></td>
+            <td><span class="lane" data-lane="server">Server</span></td>
+            <td>React Router finds it by name and leaves it out of the code it sends to browsers.</td>
+          </tr>
+          <tr>
+            <td>The component a route file exports, such as <code>Home</code></td>
+            <td>
+              <span class="lane" data-lane="server">Server</span> then
+              <span class="lane" data-lane="browser">Browser</span>
+            </td>
+            <td>The server runs it to build the HTML. The browser runs it again to make the page respond (hydration).</td>
+          </tr>
+          <tr>
+            <td><code>app/services/*.ts</code></td>
+            <td><span class="lane" data-lane="server">Server</span></td>
+            <td>Services use <code>db</code>, the connection to <code>data.db</code>. Loaders call them.</td>
+          </tr>
+          <tr>
+            <td><code>app/db/index.ts</code></td>
+            <td><span class="lane" data-lane="server">Server</span></td>
+            <td>It opens <code>data.db</code>.</td>
+          </tr>
+          <tr>
+            <td><code>data.db</code></td>
+            <td><span class="lane" data-lane="database">Database</span></td>
+            <td>Not code. Tables of rows.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <table>
+        <caption>
+          Also true, and coming up in later lessons
+        </caption>
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Runs</th>
+            <th>Why</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>An <code>action</code> in <code>app/routes/*.tsx</code></td>
+            <td><span class="lane" data-lane="server">Server</span></td>
+            <td>The loader's twin, for saving a change. Left out of the browser's code in the same way.</td>
+          </tr>
+          <tr>
+            <td>Shared components in <code>app/components/</code></td>
+            <td>
+              <span class="lane" data-lane="server">Server</span> then
+              <span class="lane" data-lane="browser">Browser</span>
+            </td>
+            <td>Route components use them, so they run wherever those run.</td>
+          </tr>
+          <tr>
+            <td>Code inside <code>useEffect(…)</code>, and click handlers</td>
+            <td><span class="lane" data-lane="browser">Browser</span></td>
+            <td>They only run once the page is live in a browser.</td>
+          </tr>
+          <tr>
+            <td><code>app/lib/*.server.ts</code></td>
+            <td><span class="lane" data-lane="server">Server</span></td>
+            <td>The <code>.server</code> in the name makes the build refuse to send the file to a browser.</td>
+          </tr>
+          <tr>
+            <td><code>app/routes/api.*.ts</code></td>
+            <td><span class="lane" data-lane="server">Server</span></td>
+            <td>These files have an <code>action</code> and no component at all.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>One page load, in seven steps</h2>
+
+      <ol>
+        <li><span class="lane" data-lane="browser">Browser</span> sends a request for an address, such as <code>/</code>.</li>
+        <li><span class="lane" data-lane="server">Server</span> finds the address in the route table, <code>app/routes.ts</code>, which names a route file.</li>
+        <li><span class="lane" data-lane="server">Server</span> runs that file's <code>loader</code>.</li>
+        <li><span class="lane" data-lane="server">Server</span> The loader calls a service, which sends a query to the database.</li>
+        <li><span class="lane" data-lane="database">Database</span> returns rows.</li>
+        <li><span class="lane" data-lane="server">Server</span> runs the component with the loader's result and sends back finished HTML.</li>
+        <li><span class="lane" data-lane="browser">Browser</span> shows the HTML, downloads the JavaScript, and runs the component again (hydration).</li>
+      </ol>
+
+      <h2>Three ways to check for yourself</h2>
+
+      <div class="cards">
+        <section class="card">
+          <h3>Where did this line run?</h3>
+          <p>
+            Put a <code>console.log("HERE")</code> on it and reload the page. If it prints in the
+            terminal, it ran on the server. If it prints in the browser console, it ran in the
+            browser. Many lines do both.
+          </p>
+        </section>
+        <section class="card">
+          <h3>What did the server send?</h3>
+          <p>
+            <kbd>Ctrl</kbd>+<kbd>U</kbd> shows the page source: the HTML exactly as it arrived,
+            before any JavaScript ran in the browser.
+          </p>
+        </section>
+        <section class="card">
+          <h3>Is it code or data?</h3>
+          <p>
+            Run <code>git status</code>. Code changes show up there. Changes to the data never do,
+            because <code>data.db</code> is left out of git.
+          </p>
+        </section>
+      </div>
+
+      <h2>The warning sign in a diff</h2>
+
+      <p>
+        Server code heading for the browser. Look for a file in <code>app/components/</code> that
+        imports from <code>~/services/…</code>, or a route file that calls a service function
+        anywhere other than inside its <code>loader</code> or <code>action</code>. A route file
+        importing a service at the top is normal: that import is for the loader.
+      </p>
+
+      <h2>Sources</h2>
+
+      <ol class="sources">
+        <li>
+          React Router 8.3.0 documentation: <a href="https://reactrouter.com/8.3.0/start/framework/route-module">Route Module</a>,
+          <a href="https://reactrouter.com/8.3.0/start/framework/data-loading">Data Loading</a>, <a href="https://reactrouter.com/8.3.0/start/framework/actions">Actions</a>,
+          <a href="https://reactrouter.com/8.3.0/api/framework-conventions/server-modules">.server modules</a>,
+          <a href="https://reactrouter.com/8.3.0/explanation/code-splitting">Automatic Code Splitting</a>.
+        </li>
+        <li>React documentation: <a href="https://react.dev/reference/react-dom/client/hydrateRoot">hydrateRoot</a>.</li>
+        <li>SQLite, <a href="https://www.sqlite.org/about.html">About SQLite</a>.</li>
+        <li>
+          The Cadence code on <code>main</code> at commit <code>90e09a1</code>, and a test run on a
+          copy of it on 6 November 2026 (a <code>console.log</code> in a loader, a component and
+          an effect).
+        </li>
+      </ol>
+
+      <nav class="lesson-nav">
+        <a href="../lessons/0001-where-code-runs.html">Lesson 1: Where does this code run?</a>
+        <span>Reference: <a href="repo-map.html">repo map</a></span>
+      </nav>
+    </main>
+  </body>
+</html>
