@@ -2,7 +2,7 @@
 pre-commit:
   jobs:
     - name: biome
-      glob: "*.{js,css,html,json,jsonc,yaml,yml}"
+      glob: "*.{js,mjs,css,html,json,jsonc,yaml,yml}"
       run: npx biome check --write --no-errors-on-unmatched {staged_files}
       stage_fixed: true
     - name: markdownlint
