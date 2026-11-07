@@ -60,7 +60,7 @@ Three version facts decide which pages to trust:
 ### Databases, SQL and SQLite
 
 - [SQLBolt](https://sqlbolt.com/)
-  Interactive SQL lessons in the browser, the most beginner-friendly option found. No named author. Use for: tables, rows, `SELECT` and joins (lessons 1 to 6 and 13 to 16).
+  Interactive SQL lessons in the browser, the most beginner-friendly option found. No named author. Use for: tables, rows, `SELECT` and joins (lessons 1 to 6 and 13 to 16). Optional since 2026-11-07: the learner already knows some SQL (learning record 0003).
 - [CS50's Introduction to Databases with SQL: notes for week 0](https://cs50.harvard.edu/sql/notes/0/) and [week 1](https://cs50.harvard.edu/sql/notes/1/)
   Harvard's free course, which uses SQLite. Use for: primary keys, foreign keys and how tables relate.
 - [SQLite: About SQLite](https://www.sqlite.org/about.html) and [SQLite Is Serverless](https://www.sqlite.org/serverless.html)

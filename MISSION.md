@@ -1,10 +1,10 @@
 # Mission: Know the Cadence codebase before building on it
 
-> **Status: draft, not yet confirmed.** Written by Claude on 2026-11-06 from the first `/teach` prompt and from what the course lessons ask of students. The learner has not confirmed it yet. Correct anything that is wrong.
+> **Status: confirmed by the learner on 2026-11-07**, after a five-question interview. Drafted by Claude on 2026-11-06 from the first `/teach` prompt and from what the course lessons ask of students.
 
 ## Why
 
-I am taking Matt Pocock's AI Coding Crash Course, which has me use Claude Code to build real features on Cadence, the course platform in `~/projects/others/ai-coding-crash-course/`. The course says to pause at the `/teach` lesson and learn the codebase first, because the very next lessons build star ratings, lesson comments and an instructor analytics dashboard on top of it. I want to direct the agent and judge what it produces with understanding, rather than accept changes I cannot read.
+I am taking Matt Pocock's AI Coding Crash Course, which has me use Claude Code to build real features on Cadence, the course platform in `~/projects/others/ai-coding-crash-course/`. The course says to pause at the `/teach` lesson and learn the codebase first, because the very next lessons build star ratings, lesson comments and an instructor analytics dashboard on top of it. I will not write the code myself; Claude Code will. What I need is to know how the parts fit and work together, and to have the right words for them, so that I can give Claude better direction and better feedback, and judge its changes rather than accept diffs I cannot read.
 
 ## Success looks like
 
@@ -17,7 +17,8 @@ I am taking Matt Pocock's AI Coding Crash Course, which has me use Claude Code t
 
 ## Constraints
 
-- Starting point: basic TypeScript and a little vibe coding. New to React, to client and server, and to databases.
+- Starting point: basic TypeScript, some SQL, and a little vibe coding. New to React, to client and server, and to JavaScript in the browser. I only ever use TypeScript, so do not teach JavaScript for its own sake.
+- Every lesson should name the parts it teaches with the words the docs and the course use, so that I can use those words with Claude.
 - Learn through this repo's real code, in short lessons, not through generic tutorials.
 - Windows with WSL2. Lessons open in the Windows browser.
 
@@ -25,5 +26,5 @@ I am taking Matt Pocock's AI Coding Crash Course, which has me use Claude Code t
 
 - `request-logger/`, the second app in the repo.
 - The AI-coding techniques themselves (context, skills, specs, tickets). The course teaches those.
-- Writing React, SQL or a web app from scratch. The goal is to read and navigate Cadence, not to become a React developer.
+- Writing React, SQL or a web app myself. The goal is to read, navigate and talk about Cadence, not to become a React developer.
 - Styling in depth (Tailwind, shadcn/ui) and deployment.

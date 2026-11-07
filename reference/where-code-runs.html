@@ -5,17 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Reference: where code runs in Cadence</title>
     <link rel="stylesheet" href="../assets/course.css" />
+    <script src="../assets/toc.js" defer></script>
+    <script src="../assets/nav.js" defer></script>
   </head>
-  <body>
+  <body data-page="sheet" data-sheet="where-code-runs">
     <main class="page sheet">
-      <nav class="topbar">
-        <span>Cadence, explained</span>
-        <span class="topbar-links">
-          <a href="../lessons/0001-where-code-runs.html">Lesson 1: Where does this code run?</a>
-          <span>Reference:</span>
-          <a href="repo-map.html">repo map</a>
-        </span>
-      </nav>
+      <nav class="topbar"><a href="../index.html">Index</a></nav>
 
       <header>
         <p class="kicker">Reference sheet</p>
@@ -70,6 +65,11 @@
             <td>React Router finds it by name and leaves it out of the code it sends to browsers.</td>
           </tr>
           <tr>
+            <td>An <code>action</code> in <code>app/routes/*.tsx</code></td>
+            <td><span class="lane" data-lane="server">Server</span></td>
+            <td>The loader's twin, for saving a change. Left out of the browser's code in the same way.</td>
+          </tr>
+          <tr>
             <td>The component a route file exports, such as <code>Home</code></td>
             <td>
               <span class="lane" data-lane="server">Server</span> then
@@ -108,11 +108,6 @@
         </thead>
         <tbody>
           <tr>
-            <td>An <code>action</code> in <code>app/routes/*.tsx</code></td>
-            <td><span class="lane" data-lane="server">Server</span></td>
-            <td>The loader's twin, for saving a change. Left out of the browser's code in the same way.</td>
-          </tr>
-          <tr>
             <td>Shared components in <code>app/components/</code></td>
             <td>
               <span class="lane" data-lane="server">Server</span> then
@@ -121,9 +116,9 @@
             <td>Route components use them, so they run wherever those run.</td>
           </tr>
           <tr>
-            <td>Code inside <code>useEffect(…)</code>, and click handlers</td>
+            <td>Code inside <code>useEffect(…)</code>, click handlers, <code>fetcher.submit(…)</code></td>
             <td><span class="lane" data-lane="browser">Browser</span></td>
-            <td>They only run once the page is live in a browser.</td>
+            <td>They only run once the page is live in a browser. Lesson 2's <code>handleSave</code> is one.</td>
           </tr>
           <tr>
             <td><code>app/lib/*.server.ts</code></td>
@@ -148,6 +143,18 @@
         <li><span class="lane" data-lane="database">Database</span> returns rows.</li>
         <li><span class="lane" data-lane="server">Server</span> runs the component with the loader's result and sends back finished HTML.</li>
         <li><span class="lane" data-lane="browser">Browser</span> shows the HTML, downloads the JavaScript, and runs the component again (hydration).</li>
+      </ol>
+
+      <h2>One save, in seven steps</h2>
+
+      <ol>
+        <li><span class="lane" data-lane="browser">Browser</span> A click or <kbd>Enter</kbd> runs a handler, which calls <code>fetcher.submit(…)</code>: a POST request carrying form data such as <code>intent=create&amp;name=Testing</code>.</li>
+        <li><span class="lane" data-lane="server">Server</span> finds the address in the route table. The request is a POST, so it runs the route file's <code>action</code>, not its <code>loader</code>.</li>
+        <li><span class="lane" data-lane="server">Server</span> The action checks who is asking (cookie, then role), reads <code>request.formData()</code>, branches on <code>intent</code>, and calls a service.</li>
+        <li><span class="lane" data-lane="server">Server</span> The service runs an <code>insert</code>, <code>update</code> or <code>delete</code> query. Errors it throws become the action's <code>error</code> result.</li>
+        <li><span class="lane" data-lane="database">Database</span> writes the row and fills in anything automatic, such as the <code>id</code>.</li>
+        <li><span class="lane" data-lane="server">Server</span> The action returns its result. React Router then runs the <code>loader</code> again (revalidation) and sends both back. After an error result nothing changed, so the loader is skipped.</li>
+        <li><span class="lane" data-lane="browser">Browser</span> runs the component again with fresh <code>loaderData</code>. An effect reads <code>fetcher.data</code> and shows a toast.</li>
       </ol>
 
       <h2>Three ways to check for yourself</h2>
@@ -198,16 +205,13 @@
         <li>React documentation: <a href="https://react.dev/reference/react-dom/client/hydrateRoot">hydrateRoot</a>.</li>
         <li>SQLite, <a href="https://www.sqlite.org/about.html">About SQLite</a>.</li>
         <li>
-          The Cadence code on <code>main</code> at commit <code>90e09a1</code>, and a test run on a
-          copy of it on 6 November 2026 (a <code>console.log</code> in a loader, a component and
-          an effect).
+          The Cadence code on <code>main</code> at commit <code>90e09a1</code>, and test runs on a
+          copy of it on 6 and 7 November 2026 (a <code>console.log</code> in a loader, an action,
+          a component and an effect; a category added, refused as a duplicate, and deleted).
         </li>
       </ol>
 
-      <nav class="lesson-nav">
-        <a href="../lessons/0001-where-code-runs.html">Lesson 1: Where does this code run?</a>
-        <span>Reference: <a href="repo-map.html">repo map</a></span>
-      </nav>
+      <nav class="lesson-nav"><a href="../index.html">Index</a></nav>
     </main>
   </body>
 </html>

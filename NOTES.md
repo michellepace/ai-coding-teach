@@ -9,6 +9,13 @@ Working notes for the teacher (Claude). Read this before planning a session.
 - Do not save subagent reports on the code into this repo. Explore afresh for each lesson.
 - Focus on the course platform (the React app in `app/`, called "Cadence"). Ignore `request-logger/`. The scraped course lessons in `lessons/` are optional and "likely not useful" as teaching material.
 
+## Confirmed on 2026-11-07 (see learning record 0003)
+
+- The learner will not write code; Claude Code will. Teach how the parts fit and the words for them. End each lesson with the words they can now use with Claude.
+- They know some SQL. Read Drizzle as the SQL it stands for.
+- Only TypeScript. Docs examples (react.dev, MDN) are often JavaScript: show the TypeScript from Cadence instead. Explain browser behaviour over syntax.
+- Lesson length of about 30 minutes including hands-on is right.
+
 ## Where the learner is in the course (as of 2026-11-06)
 
 - At the course's own `/teach` lesson (`04-fundamentals/05.1`). The course tells students to pause there and learn the codebase before building on it.
@@ -48,9 +55,11 @@ A glossary page comes later. The skill's rule is to add a term only once the lea
 ## Authoring conventions for this workspace
 
 - Every page links `assets/course.css`. Lessons use `<main class="page">`. Reference sheets use `<main class="page sheet">`.
+- Navigation is generated, never hand-written. A page declares itself on `<body>` (`data-page="lesson" data-lesson="3"`, or `data-page="sheet" data-sheet="glossary"`), keeps only `<nav class="topbar"><a href="../index.html">Index</a></nav>` at the top and an empty `<nav class="lesson-nav"></nav>` at the bottom (sheets: the Index link again), and loads `toc.js` then `nav.js`. To publish a new lesson, add its entry to `assets/toc.js` with the sheets it built or changed. The label "Cadence, explained" appears only on the index page and in tab titles; the learner found it useless as a link.
 - Load the scripts with a plain `<script src="…" defer>`, never `type="module"`: module scripts are blocked when a page is opened from disk.
 - Biome lints HTML, CSS and JS here, and `noUndeclaredClasses` is an error: every class used in HTML must exist in `assets/course.css`. Run `npx biome check lessons reference assets` before finishing.
 - Markdown files must pass `npx markdownlint-cli2`.
+- `node scripts/check-links.mjs` checks that every local link, anchor and `toc.js` entry resolves; the pre-commit hook runs it. External links are not checked, so check them by hand now and then.
 - When a code excerpt skips lines, show line numbers (`<span class="ln">`) so the gaps are honest. Check every excerpt and line number against the real file.
 - Open a page for the learner with `explorer.exe 'lessons\<file>.html'` (it exits 1 even on success).
 
@@ -60,6 +69,7 @@ A glossary page comes later. The skill's rule is to add a term only once the lea
 - `quiz.js`: multiple-choice quiz. First answer counts, options shuffle on each load, and the result can be copied as text for the learner to paste back.
 - `trace.js`: steps through a journey across browser, server and database, one hop at a time. Reuse it for every request-flow lesson.
 - `img/home-stats.jpg`: the stats band of the home page, cropped from `images/course-platform.jpg`.
+- `toc.js`: the table of contents, the one place that lists lessons and reference sheets. `nav.js` reads it and draws every page's header (Index on the left, previous and next lesson on the right), every lesson's footer (the sheets it used, then previous and next again) and the lists on `index.html`. Added 2026-11-07 at the learner's request, so that adding a lesson never means editing other pages by hand.
 
 ## Quiz rules (from the skill)
 
