@@ -9,6 +9,13 @@ Working notes for the teacher (Claude). Read this before planning a session.
 - Do not save subagent reports on the code into this repo. Explore afresh for each lesson.
 - Focus on the course platform (the React app in `app/`, called "Cadence"). Ignore `request-logger/`. The scraped course lessons in `lessons/` are optional and "likely not useful" as teaching material.
 
+## Confirmed on 2026-11-07 (see learning record 0003)
+
+- The learner will not write code; Claude Code will. Teach how the parts fit and the words for them. End each lesson with the words they can now use with Claude.
+- They know some SQL. Read Drizzle as the SQL it stands for.
+- Only TypeScript. Docs examples (react.dev, MDN) are often JavaScript: show the TypeScript from Cadence instead. Explain browser behaviour over syntax.
+- Lesson length of about 30 minutes including hands-on is right.
+
 ## Where the learner is in the course (as of 2026-11-06)
 
 - At the course's own `/teach` lesson (`04-fundamentals/05.1`). The course tells students to pause there and learn the codebase before building on it.

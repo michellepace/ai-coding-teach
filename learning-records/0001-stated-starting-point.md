@@ -1,5 +1,7 @@
 # Stated starting point: basic TypeScript, new to React, client/server and databases
 
+Status: refined by 0003 (SQL known, no browser JavaScript, vocabulary is the goal).
+
 On 2026-11-06 the learner opened with: "I've done a little bit of vibe coding before. I know the basics of TypeScript. I've never worked in React before, and I'm not very clear about client and server, and certainly not about the database." This sets the floor for every lesson: TypeScript syntax can be assumed, and every React, web and database idea must be introduced from zero.
 
 ## Evidence

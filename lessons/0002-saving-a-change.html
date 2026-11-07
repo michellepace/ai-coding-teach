@@ -1,0 +1,690 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lesson 2: What happens when you press Save? · Cadence, explained</title>
+    <link rel="stylesheet" href="../assets/course.css" />
+    <script src="../assets/trace.js" defer></script>
+    <script src="../assets/quiz.js" defer></script>
+  </head>
+  <body>
+    <main class="page">
+      <nav class="topbar">
+        <span>Cadence, explained</span>
+        <span class="topbar-links">
+          <a href="0001-where-code-runs.html">Lesson 1</a>
+          <span>Reference:</span>
+          <a href="../reference/where-code-runs.html">where code runs</a>
+          <a href="../reference/glossary.html">glossary</a>
+          <a href="../reference/repo-map.html">repo map</a>
+        </span>
+      </nav>
+
+      <header>
+        <p class="kicker">Lesson 2</p>
+        <h1>What happens when you press Save?</h1>
+        <p class="lede">
+          In lesson 1 you typed <em>Testing</em> into the admin page, pressed <kbd>Enter</kbd>,
+          and the home page went from 5 categories to 6. Lesson 1 followed a number
+          <em>out</em> of the database. This lesson follows a change <em>in</em>.
+        </p>
+      </header>
+
+      <div class="callout">
+        <p class="callout-title">What you will be able to do</p>
+        <ul>
+          <li>Trace a save from the keypress in the browser to the new row in <code>data.db</code>, and back to the refreshed page.</li>
+          <li>Say in which order the <code>action</code>, the <code>loader</code> and the component run after a save, and why.</li>
+          <li>Use the words <strong>action</strong>, <strong>intent</strong>, <strong>fetcher</strong> and <strong>revalidation</strong> when you ask Claude for a feature that saves something.</li>
+        </ul>
+      </div>
+
+      <h2>Why this comes next</h2>
+
+      <aside class="sidenote">
+        The star-ratings lesson: file <code>06.1</code> in <code>lessons/04-fundamentals/</code>
+        of your course repo.
+      </aside>
+      <p>
+        Every feature the course has Claude build from here on <em>saves</em> something: a star
+        rating, a comment, an answer. Each one is a copy of the journey on this page, with
+        different names. Once you can read this one, you can read Claude's diff for any of them
+        and say which part is missing.
+      </p>
+
+      <h2>Reading and writing are twins</h2>
+
+      <p>
+        A route file can export two special functions. You met one in lesson 1. The
+        <strong>loader</strong> reads: it fetches what the page needs. The <strong>action</strong>
+        writes: it takes a change the browser sent and saves it. Both live in the same file, and
+        both run only on the server.
+      </p>
+
+      <blockquote class="quote">
+        <p>
+          Data mutations are done through Route actions. When the action completes, all loader
+          data on the page is revalidated to keep your UI in sync with the data without writing
+          any code to do it.
+        </p>
+        <footer>React Router, <a href="https://reactrouter.com/8.3.0/start/framework/actions">Actions</a></footer>
+      </blockquote>
+
+      <aside class="sidenote">
+        <strong>Mutation</strong> is the docs' word for a change to the data: an insert, an
+        update or a delete. <strong>Revalidated</strong> means "the loader was run again".
+      </aside>
+      <p>
+        Two new words in that sentence, and both will come up again. The second one is the whole
+        trick of this lesson: after a save, you never write code to refresh the page. The loader
+        simply runs again.
+      </p>
+
+      <h2>Follow the Testing</h2>
+
+      <p>
+        You are Alex Rivera, the admin, on <code>localhost:5173/admin/categories</code>. You have
+        clicked <em>Add Category</em>, typed <em>Testing</em>, and you press <kbd>Enter</kbd>.
+        Here is everything that happens next. Every excerpt is real code from your repo, with its
+        line numbers.
+      </p>
+
+      <figure class="trace wide">
+        <ol class="trace-steps">
+          <li class="trace-step" data-lane="browser" data-send="server">
+            <h4><span class="lane">Browser</span> 1. The component sends the change</h4>
+            <figure class="code">
+              <figcaption><span class="code-path">app/routes/admin.categories.tsx</span></figcaption>
+              <pre><code><span class="ln">134</span>  const fetcher = <mark>useFetcher()</mark>;
+<span class="ln">⋮</span>
+<span class="ln">151</span>  function handleSave() {
+<span class="ln">152</span>    const trimmed = name.trim();
+<span class="ln">153</span>    if (!trimmed) return;
+<span class="ln">154</span>    <mark>fetcher.submit(</mark>
+<span class="ln">155</span>      { <mark>intent: "create"</mark>, name: trimmed },
+<span class="ln">156</span>      { <mark>method: "post"</mark> }
+<span class="ln">157</span>    );
+<span class="ln">158</span>  }</code></pre>
+            </figure>
+            <p>
+              Pressing <kbd>Enter</kbd> calls <code>handleSave</code>. It runs in the browser,
+              because a keypress can only happen there. Line 154 is the send: a
+              <strong>fetcher</strong> is React Router's tool for posting a change to the server
+              without leaving the page. What it posts is the pair <code>intent=create</code>,
+              <code>name=Testing</code>, as a <strong>POST</strong> request to the page's own
+              address, <code>/admin/categories</code>.
+            </p>
+            <p>
+              MDN: "When you click a link on a web page, submit a form, or run a search, the
+              browser sends an HTTP Request to the server"
+              (<a href="https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Server-side/First_steps/Client-Server_overview">Client-server overview</a>). Lesson 1's request said
+              <em>give me</em>. This one says <em>change this</em>.
+            </p>
+          </li>
+
+          <li class="trace-step" data-lane="server">
+            <h4><span class="lane">Server</span> 2. The route table, again</h4>
+            <figure class="code">
+              <figcaption><span class="code-path">app/routes.ts</span></figcaption>
+              <pre><code><span class="ln">42</span>    route("admin/categories", <mark>"routes/admin.categories.tsx"</mark>),</code></pre>
+            </figure>
+            <p>
+              Same lookup as lesson 1: the address names the route file. But this request is a
+              POST, so the server does not run the file's <code>loader</code>. It runs its
+              <code>action</code>.
+            </p>
+          </li>
+
+          <li class="trace-step" data-lane="server">
+            <h4><span class="lane">Server</span> 3. The action checks, then reads the change</h4>
+            <figure class="code">
+              <figcaption><span class="code-path">app/routes/admin.categories.tsx</span></figcaption>
+              <pre><code><span class="ln">68</span>export async function <mark>action</mark>({ request }: Route.ActionArgs) {
+<span class="ln">69</span>  const currentUserId = await getCurrentUserId(request);
+<span class="ln">⋮</span>
+<span class="ln">76</span>  if (!currentUser || currentUser.role !== UserRole.Admin) {
+<span class="ln">77</span>    throw data("Only admins can manage categories.", { status: 403 });
+<span class="ln">⋮</span>
+<span class="ln">80</span>  const formData = await <mark>request.formData()</mark>;
+<span class="ln">81</span>  const parsed = parseFormData(formData, adminCategoryActionSchema);
+<span class="ln">⋮</span>
+<span class="ln">92</span>  if (<mark>intent === "create"</mark>) {
+<span class="ln">93</span>    try {
+<span class="ln">94</span>      <mark>createCategory(parsed.data.name)</mark>;
+<span class="ln">95</span>      return { success: true, message: "Category created." };</code></pre>
+            </figure>
+            <aside class="sidenote">
+              <code>intent</code> is not a React Router word. It is this codebase's own habit:
+              one <code>action</code> per page, and an <code>intent</code> field to say which of
+              its jobs (<code>create</code>, <code>update</code>, <code>delete</code>) this
+              request wants. Claude will know the pattern from the code.
+            </aside>
+            <p>
+              Three things, in order. <strong>Who is asking?</strong> Line 69 reads the current
+              user from a cookie the browser sent along, and line 76 refuses anyone who is not an
+              admin. The loader makes the same check, but the action cannot rely on that: a POST
+              can be sent straight to this address by anyone, with no page involved, so every
+              door must have its own lock. <strong>What do they want?</strong> Line 80 unpacks
+              the form data, and line 81 checks it has the right shape. <strong>Do it.</strong>
+              Line 94 hands the name to a service.
+            </p>
+          </li>
+
+          <li class="trace-step" data-lane="server" data-send="database">
+            <h4><span class="lane">Server</span> 4. The service inserts a row</h4>
+            <figure class="code">
+              <figcaption><span class="code-path">app/services/categoryService.ts</span></figcaption>
+              <pre><code><span class="ln">55</span>export function createCategory(name: string) {
+<span class="ln">56</span>  const slug = slugify(name);
+<span class="ln">⋮</span>
+<span class="ln">58</span>  const existingName = getCategoryByName(name);
+<span class="ln">59</span>  if (existingName) {
+<span class="ln">60</span>    throw new Error(`A category with the name "${name}" already exists.`);
+<span class="ln">61</span>  }
+<span class="ln">⋮</span>
+<span class="ln">68</span>  return db
+<span class="ln">69</span>    <mark>.insert(categories)</mark>
+<span class="ln">70</span>    <mark>.values({ name, slug })</mark>
+<span class="ln">71</span>    .returning()
+<span class="ln">72</span>    .get();
+<span class="ln">73</span>}</code></pre>
+            </figure>
+            <aside class="sidenote">
+              Drizzle "provides you the most SQL-like way to insert rows into the database
+              tables" (<a href="https://orm.drizzle.team/docs/sqlite/insert">Drizzle: Insert</a>). When you can read the SQL, you can read the
+              Drizzle.
+            </aside>
+            <p>
+              Lesson 1's service did a <code>select</code>. This one does an <code>insert</code>.
+              You know SQL, so read lines 68 to 72 as
+              <code>INSERT INTO categories (name, slug) VALUES ('Testing', 'testing')</code>,
+              with <code>.returning().get()</code> handing back the row that was written. Before
+              that, line 58 is a <code>SELECT … WHERE name = 'Testing'</code>, and line 60 is
+              what happens if it finds something. Keep that sentence in mind.
+            </p>
+          </li>
+
+          <li class="trace-step" data-lane="database" data-send="server">
+            <h4><span class="lane">Database</span> 5. A sixth row</h4>
+            <figure class="code">
+              <figcaption><span class="code-path">app/db/schema.ts</span></figcaption>
+              <pre><code><span class="ln">45</span>export const categories = sqliteTable("categories", {
+<span class="ln">46</span>  id: integer("id").primaryKey({ <mark>autoIncrement: true</mark> }),
+<span class="ln">47</span>  name: text("name").notNull(),
+<span class="ln">48</span>  slug: text("slug").notNull().unique(),
+<span class="ln">49</span>});</code></pre>
+            </figure>
+            <table>
+              <caption>
+                The <code>categories</code> table in <code>data.db</code>, after the insert
+              </caption>
+              <thead>
+                <tr>
+                  <th>id</th>
+                  <th>name</th>
+                  <th>slug</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1</td>
+                  <td>Programming</td>
+                  <td>programming</td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>Design</td>
+                  <td>design</td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>Data Science</td>
+                  <td>data-science</td>
+                </tr>
+                <tr>
+                  <td>4</td>
+                  <td>DevOps</td>
+                  <td>devops</td>
+                </tr>
+                <tr>
+                  <td>5</td>
+                  <td>Marketing</td>
+                  <td>marketing</td>
+                </tr>
+                <tr>
+                  <td><ins>6</ins></td>
+                  <td><ins>Testing</ins></td>
+                  <td><ins>testing</ins></td>
+                </tr>
+              </tbody>
+            </table>
+            <p>
+              The service sent two columns. The database filled in the third: line 46 of the
+              <strong>schema</strong> says <code>id</code> is assigned automatically, counting
+              up. That is why the row is 6 and nobody chose the number. The schema file is the
+              description of every table's shape, and it gets its own lesson. The row goes back
+              to the service, and the service returns it to the action.
+            </p>
+          </li>
+
+          <li class="trace-step" data-lane="server" data-send="browser">
+            <h4><span class="lane">Server</span> 6. The action answers, and the loader runs again</h4>
+            <figure class="code">
+              <figcaption><span class="code-path">app/routes/admin.categories.tsx</span></figcaption>
+              <pre><code><span class="ln">46</span>export async function <mark>loader</mark>({ request }: Route.LoaderArgs) {
+<span class="ln">⋮</span>
+<span class="ln">63</span>  const categories = getAllCategoriesWithCourseCounts();
+<span class="ln">64</span>
+<span class="ln">65</span>  return { categories };
+<span class="ln">66</span>}</code></pre>
+            </figure>
+            <p>
+              Line 95 returns <code>{ success: true, message: "Category created." }</code>. Then,
+              with no line of code asking for it, React Router runs the <code>loader</code>
+              again. This is the <strong>revalidation</strong> from the quote above: the data has
+              changed, so the page's data is fetched afresh, and line 63 now gets six rows. The
+              response to the browser carries both: the action's message and the loader's new
+              list.
+            </p>
+          </li>
+
+          <li class="trace-step" data-lane="browser">
+            <h4><span class="lane">Browser</span> 7. The page redraws itself</h4>
+            <figure class="code">
+              <figcaption><span class="code-path">app/routes/admin.categories.tsx</span></figcaption>
+              <pre><code><span class="ln">140</span>  useEffect(() => {
+<span class="ln">141</span>    if (fetcher.state === "idle" &amp;&amp; <mark>fetcher.data?.success</mark>) {
+<span class="ln">142</span>      <mark>toast.success(fetcher.data.message)</mark>;
+<span class="ln">143</span>      setName("");
+<span class="ln">144</span>      onClose();
+<span class="ln">145</span>    }</code></pre>
+            </figure>
+            <aside class="sidenote">
+              <code>useEffect</code> is React's "after the page is drawn, do this" hook. Code
+              inside it only ever runs in the browser. The
+              <a href="../reference/where-code-runs.html">reference sheet</a> lists it.
+            </aside>
+            <p>
+              The component runs again, this time only in the browser, with the new
+              <code>loaderData</code>: the table shows six rows. The action's answer lands in
+              <code>fetcher.data</code>, and lines 140 to 145 react to it: the green
+              "Category created." <strong>toast</strong> in the corner, an emptied input, and
+              the add row closes. No full page load happened. And the next time anyone opens the
+              home page, its loader counts six rows, and the stat says 6.
+            </p>
+          </li>
+        </ol>
+        <figcaption>
+          One save, start to finish. Step through it, then choose "Show all steps".
+        </figcaption>
+      </figure>
+
+      <p>The order to remember, because the quiz asks:</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>What</th>
+            <th>Where it runs</th>
+            <th>What it does</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>fetcher.submit(…)</code> in the component</td>
+            <td><span class="lane" data-lane="browser">Browser</span> only</td>
+            <td>Sends a POST request carrying the form data</td>
+          </tr>
+          <tr>
+            <td>The <code>action</code> function in the route file</td>
+            <td><span class="lane" data-lane="server">Server</span> only</td>
+            <td>Checks who is asking, reads the form data, calls a service</td>
+          </tr>
+          <tr>
+            <td>The service, such as <code>createCategory</code></td>
+            <td><span class="lane" data-lane="server">Server</span> only</td>
+            <td>Runs the <code>INSERT</code> against <code>data.db</code></td>
+          </tr>
+          <tr>
+            <td>The <code>loader</code>, run again (revalidation)</td>
+            <td><span class="lane" data-lane="server">Server</span> only</td>
+            <td>Fetches the fresh list, automatically</td>
+          </tr>
+          <tr>
+            <td>The component, run again, and its effect</td>
+            <td><span class="lane" data-lane="browser">Browser</span> only</td>
+            <td>Redraws the table, shows the toast</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>When the save fails</h2>
+
+      <figure class="code">
+        <figcaption><span class="code-path">app/routes/admin.categories.tsx</span></figcaption>
+        <pre><code><span class="ln">96</span>    } catch (e) {
+<span class="ln">97</span>      return data(
+<span class="ln">98</span>        { <mark>error: e instanceof Error ? e.message</mark> : "Failed to create category." },
+<span class="ln">99</span>        { status: 400 }
+<span class="ln">100</span>      );
+<span class="ln">⋮</span>
+<span class="ln">146</span>    if (fetcher.state === "idle" &amp;&amp; fetcher.data?.error) {
+<span class="ln">147</span>      <mark>toast.error(fetcher.data.error)</mark>;
+<span class="ln">148</span>    }</code></pre>
+      </figure>
+      <p>
+        Try to add <em>Design</em> a second time and a red toast says
+        <em>A category with the name "Design" already exists.</em> You have already read that
+        sentence: it is line 60 of the service, on the server. The service throws it, the action
+        catches it on line 96 and sends it back as an <code>error</code> with status 400, and
+        the effect on line 147 shows it. Nothing was written, so the loader does not run again.
+        Three places took part in one error message, and the words were chosen in the service.
+      </p>
+
+      <h2>The same shape, seventeen times</h2>
+
+      <aside class="sidenote">
+        To see them: <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd> in the course repo, search
+        <code>export async function action</code>.
+      </aside>
+      <p>
+        Seventeen route files in <code>app/routes/</code> export an <code>action</code>, and
+        almost all follow this shape: check the user, read the form data, branch on
+        <code>intent</code>, call a service, return a result. So when Claude builds a feature
+        that saves something, expect its diff to touch three things: a <strong>service</strong>
+        function that writes, an <strong>action</strong> (or a new <code>intent</code> in an
+        existing one) that calls it, and a <strong>fetcher</strong> or form in the component
+        that submits. If one of the three is missing, ask where it is.
+      </p>
+
+      <h2>Prove it</h2>
+
+      <p>
+        About ten minutes. You need the app running (<code>npm run dev</code>), and in the DevUI
+        panel switch to <em>Alex Rivera</em>. Open <code>localhost:5173/admin/categories</code>.
+      </p>
+
+      <ol class="checklist">
+        <li>
+          <p><strong>Watch the order.</strong></p>
+          <p>
+            Open <code>app/routes/admin.categories.tsx</code> and add the two highlighted lines,
+            one as the first line of <code>loader</code> and one as the first line of
+            <code>action</code>. Save the file.
+          </p>
+          <figure class="code wide">
+            <figcaption><span class="code-path">app/routes/admin.categories.tsx</span></figcaption>
+            <pre><code><span class="ln">46</span>export async function loader({ request }: Route.LoaderArgs) {
+<span class="ln">+</span><ins>  console.log("LOADER RAN");</ins>
+<span class="ln">⋮</span>
+<span class="ln">68</span>export async function action({ request }: Route.ActionArgs) {
+<span class="ln">+</span><ins>  console.log("ACTION RAN");</ins></code></pre>
+          </figure>
+          <p>
+            In the browser press <kbd>F12</kbd> and choose the <em>Network</em> tab. Reload the
+            page once so the two lines are picked up, then clear the terminal with
+            <kbd>Ctrl</kbd>+<kbd>L</kbd>. Click <em>Add Category</em>, type <code>Testing</code>,
+            press <kbd>Enter</kbd>. Before you look: in what order will the two messages appear in
+            the terminal, and will either show in the browser console?
+          </p>
+          <details class="reveal">
+            <summary>I have predicted and looked. Show me what should have happened.</summary>
+            <div class="reveal-body">
+              <p>
+                <strong>Terminal:</strong> <code>ACTION RAN</code>, then <code>LOADER RAN</code>.
+                The action saved, then the loader was run again without anyone asking.
+                <strong>Browser console:</strong> neither. Both functions live on the server.
+              </p>
+              <p>
+                <strong>Network tab:</strong> two new requests, both called
+                <code>categories.data</code>. The first has method <code>POST</code>: click it,
+                then <em>Payload</em>, and you will see <code>intent: create</code> and
+                <code>name: Testing</code>, the two fields from line 155. Its <em>Response</em>
+                contains "Category created." The second is a <code>GET</code>: that is the loader
+                running again. (React Router adds <code>.data</code> to the address for the
+                requests it makes itself after the first page load.)
+              </p>
+            </div>
+          </details>
+        </li>
+
+        <li>
+          <p><strong>Make it fail.</strong></p>
+          <p>
+            Click <em>Add Category</em> again and type <code>Design</code>, which already exists.
+            Press <kbd>Enter</kbd>. Before you look at the terminal: how many messages this time,
+            and where did the sentence in the red toast come from?
+          </p>
+          <details class="reveal">
+            <summary>I have predicted and looked. Show me what should have happened.</summary>
+            <div class="reveal-body">
+              <p>
+                <strong>Terminal:</strong> <code>ACTION RAN</code> only. Nothing was written, so
+                the loader was not run again. In the Network tab the POST is red, with status
+                400, which is the number from line 99.
+              </p>
+              <p>
+                The toast's sentence was written on line 60 of
+                <code>app/services/categoryService.ts</code>: the service, on the server. It
+                travelled through the action's <code>catch</code> and into
+                <code>fetcher.data.error</code> in the browser. Press <kbd>Esc</kbd> to close the
+                add row.
+              </p>
+            </div>
+          </details>
+        </li>
+
+        <li>
+          <p><strong>Put everything back.</strong></p>
+          <p>
+            On the <em>Testing</em> row click the bin icon. It deletes at once. Glance at the
+            Network tab first: the POST's payload is <code>intent: delete</code> and
+            <code>categoryId: 6</code>, the row number the database assigned. Then run
+            <code>git restore app/routes/admin.categories.tsx</code> in the course repo to remove
+            your two lines, and switch DevUI back to your usual user.
+          </p>
+        </li>
+      </ol>
+
+      <h2>Check yourself</h2>
+
+      <p>
+        Five questions. Answer from memory without scrolling up. Your first answer to each is the
+        one that counts.
+      </p>
+
+      <section class="quiz" data-quiz="0002-saving-a-change" data-title="Lesson 2, What happens when you press Save?">
+        <article class="quiz-q" data-answer="b">
+          <p class="quiz-prompt">
+            You press <kbd>Enter</kbd> on a new category and the save succeeds. In what order do
+            these three run?
+          </p>
+          <ul class="quiz-options">
+            <li data-option="a">Loader, then action, then component</li>
+            <li data-option="b">Action, then loader, then component</li>
+            <li data-option="c">Component, then action, then loader</li>
+          </ul>
+          <p class="quiz-why" hidden>
+            The action saves the change. React Router then runs the loader again so the page's
+            data is fresh. Last, the browser runs the component with the new
+            <code>loaderData</code>. That is the <code>ACTION RAN</code>, <code>LOADER RAN</code>
+            order you saw in the terminal.
+          </p>
+        </article>
+
+        <article class="quiz-q" data-answer="c">
+          <p class="quiz-prompt">
+            Claude's diff deletes the admin check from <code>action</code> (lines 75 to 78), with
+            the note "the loader already checks this". Why is that wrong?
+          </p>
+          <ul class="quiz-options">
+            <li data-option="a">The loader runs after the action, so its check comes late</li>
+            <li data-option="b">The action runs in the browser, where the loader cannot check</li>
+            <li data-option="c">A POST can arrive without the page, so each must check</li>
+          </ul>
+          <p class="quiz-why" hidden>
+            A POST request can be sent straight to <code>/admin/categories</code> by anything,
+            without the page ever loading. The loader's check guards reading the page; the
+            action's check guards changing the data. Both run on the server, and each needs its
+            own lock.
+          </p>
+        </article>
+
+        <article class="quiz-q" data-answer="a">
+          <p class="quiz-prompt">
+            Where does <code>handleSave</code>, the function that calls
+            <code>fetcher.submit(…)</code> on line 154, run?
+          </p>
+          <ul class="quiz-options">
+            <li data-option="a">In the browser only</li>
+            <li data-option="b">On the server only</li>
+            <li data-option="c">In both, server first</li>
+          </ul>
+          <p class="quiz-why" hidden>
+            <code>handleSave</code> runs when a key is pressed or a button is clicked, and
+            clicks only happen in a browser. It is the sending end. The receiving end, the
+            <code>action</code>, is the part that runs on the server.
+          </p>
+        </article>
+
+        <article class="quiz-q" data-answer="b">
+          <p class="quiz-prompt">
+            A red toast says <em>A category with the name "Design" already exists.</em> Which
+            place chose those words?
+          </p>
+          <ul class="quiz-options">
+            <li data-option="a">The browser, inside the component's effect</li>
+            <li data-option="b">The server, inside the category service</li>
+            <li data-option="c">The database, as a uniqueness error</li>
+          </ul>
+          <p class="quiz-why" hidden>
+            Line 60 of <code>categoryService.ts</code> builds that sentence and throws it. The
+            action catches it and returns it as <code>error</code>; the component's effect only
+            displays it. The database never saw the duplicate: the service checked first.
+          </p>
+        </article>
+
+        <article class="quiz-q" data-answer="c">
+          <p class="quiz-prompt">
+            Claude replaces <code>fetcher.submit(…)</code> in <code>handleSave</code> with a
+            direct call, <code>createCategory(trimmed)</code>. Why is that a mistake?
+          </p>
+          <ul class="quiz-options">
+            <li data-option="a">handleSave runs on the server, so the fetcher is lost</li>
+            <li data-option="b">handleSave runs before the loader, so the table stays stale</li>
+            <li data-option="c">handleSave runs in the browser, which can never open data.db</li>
+          </ul>
+          <p class="quiz-why" hidden>
+            <code>handleSave</code> is browser code, and <code>createCategory</code> uses
+            <code>db</code>, the server's open connection to <code>data.db</code>. The browser
+            has no such thing. Database writes belong in the action, which is why the component
+            <em>submits</em> instead of calling. This is the same mistake as lesson 1's last
+            question, in its most common disguise.
+          </p>
+        </article>
+      </section>
+
+      <h2>Words to use with Claude</h2>
+
+      <p>
+        You can now put these in a prompt or a review comment, and Claude will know exactly what
+        you mean. All of them are in the <a href="../reference/glossary.html">glossary</a>.
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Word</th>
+            <th>Use it like this</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>action</strong></td>
+            <td>"Put the save in the route's <code>action</code>, not in the component."</td>
+          </tr>
+          <tr>
+            <td><strong>intent</strong></td>
+            <td>"Add a <code>rate</code> intent to the existing action rather than a new route."</td>
+          </tr>
+          <tr>
+            <td><strong>fetcher</strong></td>
+            <td>"Submit it with a fetcher so the page does not navigate away."</td>
+          </tr>
+          <tr>
+            <td><strong>service</strong></td>
+            <td>"The insert should live in a service function, and the action should call it."</td>
+          </tr>
+          <tr>
+            <td><strong>revalidation</strong></td>
+            <td>"You do not need to refetch the list after saving; revalidation does that."</td>
+          </tr>
+          <tr>
+            <td><strong>mutation</strong></td>
+            <td>"Which of these changes is a mutation, and which is just a read?"</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout">
+        <p class="callout-title">Go to the source</p>
+        <p>
+          <strong>React Router, <a href="https://reactrouter.com/8.3.0/start/framework/actions">Actions</a></strong> (10 minutes). Short, and every
+          sentence applies to Cadence. Then
+          <a href="https://reactrouter.com/8.3.0/explanation/form-vs-fetcher">Form vs. fetcher</a> (5 minutes) for why this page uses a fetcher: in
+          the docs' words, "the primary criterion when choosing among these tools is whether you
+          want the URL to change or not". Adding a category should not move you to a new page, so
+          it is a fetcher.
+        </p>
+      </div>
+
+      <div class="callout callout-quiet">
+        <p class="callout-title">Ask your teacher</p>
+        <p>
+          Back in Claude Code, in this workspace, paste your quiz result and ask anything that is
+          still fuzzy. For example: <em>What is in the cookie that line 69 reads?</em>
+          <em>What does <code>parseFormData</code> check, exactly?</em> <em>Why does the delete
+          button not ask "are you sure"?</em> <em>What would a <code>&lt;Form&gt;</code> do
+          differently from a fetcher?</em>
+        </p>
+      </div>
+
+      <h2>Sources</h2>
+
+      <ol class="sources">
+        <li>
+          React Router 8.3.0 documentation: <a href="https://reactrouter.com/8.3.0/start/framework/actions">Actions</a>,
+          <a href="https://reactrouter.com/8.3.0/start/framework/route-module">Route Module</a>,
+          <a href="https://reactrouter.com/8.3.0/explanation/form-vs-fetcher">Form vs. fetcher</a>,
+          <a href="https://reactrouter.com/8.3.0/how-to/fetchers">Using Fetchers</a>.
+        </li>
+        <li>
+          MDN, <a href="https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Server-side/First_steps/Client-Server_overview">Client-server overview</a>.
+        </li>
+        <li>Drizzle, <a href="https://orm.drizzle.team/docs/sqlite/insert">Insert</a>.</li>
+        <li>
+          The Cadence code on the <code>main</code> branch at commit <code>90e09a1</code>:
+          <code>app/routes.ts</code>, <code>app/routes/admin.categories.tsx</code>,
+          <code>app/services/categoryService.ts</code>, <code>app/db/schema.ts</code>. Every
+          excerpt and line number was checked against those files.
+        </li>
+        <li>
+          My own test, 7 November 2026, on a throwaway copy of your repo driven by a headless
+          browser: the terminal order, the two <code>categories.data</code> requests and their
+          payloads, the 400 on the duplicate, the toast text, and the row with id 6 appearing in
+          and disappearing from <code>data.db</code> are what that copy actually did.
+        </li>
+        <li>
+          The AI Coding Crash Course, "Build a Feature", in your course repo's
+          <code>lessons/04-fundamentals/</code> folder.
+        </li>
+      </ol>
+
+      <nav class="lesson-nav">
+        <a href="0001-where-code-runs.html">Lesson 1: Where does this code run?</a>
+        <span>Lesson 3 is not written yet. Your quiz result decides what it covers.</span>
+      </nav>
+    </main>
+  </body>
+</html>

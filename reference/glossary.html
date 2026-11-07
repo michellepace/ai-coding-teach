@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Reference: glossary of Cadence words</title>
+    <link rel="stylesheet" href="../assets/course.css" />
+  </head>
+  <body>
+    <main class="page sheet">
+      <nav class="topbar">
+        <span>Cadence, explained</span>
+        <span class="topbar-links">
+          <a href="../lessons/0001-where-code-runs.html">Lesson 1</a>
+          <a href="../lessons/0002-saving-a-change.html">Lesson 2</a>
+          <span>Reference:</span>
+          <a href="where-code-runs.html">where code runs</a>
+          <a href="repo-map.html">repo map</a>
+        </span>
+      </nav>
+
+      <header>
+        <p class="kicker">Reference sheet</p>
+        <h1>Glossary</h1>
+        <p class="lede">
+          The words the docs, the course and Claude use for the parts of Cadence. Use them in
+          prompts and review comments. A word joins this sheet once a lesson has taught it.
+        </p>
+      </header>
+
+      <h2>Places</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Word</th>
+            <th>Means</th>
+            <th>In Cadence</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>browser</strong></td>
+            <td>The program that shows the page and reacts to clicks. The docs say <em>client</em>.</td>
+            <td>The tab at <code>localhost:5173</code>. Its console: <kbd>F12</kbd>.</td>
+          </tr>
+          <tr>
+            <td><strong>server</strong></td>
+            <td>The program that waits for requests and answers them. A role, not a machine.</td>
+            <td>What <code>npm run dev</code> starts. Its console: the terminal.</td>
+          </tr>
+          <tr>
+            <td><strong>database</strong></td>
+            <td>Where the data rests, whether or not anything is running.</td>
+            <td>The file <code>data.db</code>. SQLite, so a file, not a program. Only the server opens it.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>The journey</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Word</th>
+            <th>Means</th>
+            <th>In Cadence</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>request</strong></td>
+            <td>A message from the browser to the server. A <strong>GET</strong> asks for a page; a <strong>POST</strong> sends a change.</td>
+            <td>Typing an address sends a GET. Pressing Save on the admin page sends a POST.</td>
+          </tr>
+          <tr>
+            <td><strong>response</strong></td>
+            <td>The server's answer to a request.</td>
+            <td>Finished HTML for a first page load; data for a fetcher.</td>
+          </tr>
+          <tr>
+            <td><strong>form data</strong></td>
+            <td>The named fields a POST carries.</td>
+            <td><code>intent=create&amp;name=Testing</code>. Read on the server with <code>request.formData()</code>.</td>
+          </tr>
+          <tr>
+            <td><strong>hydration</strong></td>
+            <td>The browser running the component a second time, over the server's HTML, to make the page respond.</td>
+            <td>Why <code>COMPONENT RAN</code> printed in both consoles in lesson 1.</td>
+          </tr>
+          <tr>
+            <td><strong>mutation</strong></td>
+            <td>A change to the data: an insert, an update or a delete. The docs' word; the course says "write".</td>
+            <td>Adding a category. Rating a lesson, once the course has you build it.</td>
+          </tr>
+          <tr>
+            <td><strong>revalidation</strong></td>
+            <td>React Router running the page's loader again after an action, so the page's data is fresh. Automatic.</td>
+            <td>The <code>LOADER RAN</code> that followed <code>ACTION RAN</code> in lesson 2.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>In a route file</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Word</th>
+            <th>Means</th>
+            <th>In Cadence</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>route table</strong></td>
+            <td>The list of every address the app answers to, each paired with its route file.</td>
+            <td><code>app/routes.ts</code>. A route file not listed there gives a 404.</td>
+          </tr>
+          <tr>
+            <td><strong>route file</strong></td>
+            <td>The file that handles one address. The docs say <em>route module</em>.</td>
+            <td>A file in <code>app/routes/</code>, such as <code>admin.categories.tsx</code>.</td>
+          </tr>
+          <tr>
+            <td><strong>loader</strong></td>
+            <td>The route file's function that reads what the page needs. Server only.</td>
+            <td><code>export async function loader</code>. Its result reaches the component as <code>loaderData</code>.</td>
+          </tr>
+          <tr>
+            <td><strong>action</strong></td>
+            <td>The route file's function that receives a change and saves it. Server only. The loader's twin.</td>
+            <td><code>export async function action</code>. Seventeen route files have one.</td>
+          </tr>
+          <tr>
+            <td><strong>component</strong></td>
+            <td>The function that describes what the page looks like. Runs on the server, then in the browser.</td>
+            <td>The <code>export default function</code> in a route file, such as <code>Home</code>.</td>
+          </tr>
+          <tr>
+            <td><strong>intent</strong></td>
+            <td>This codebase's habit, not a React Router word: a form field that says which job the action should do.</td>
+            <td><code>create</code>, <code>update</code> or <code>delete</code> on the admin categories page.</td>
+          </tr>
+          <tr>
+            <td><strong>fetcher</strong></td>
+            <td>React Router's tool for sending a change (or fetching data) without leaving the page.</td>
+            <td><code>useFetcher()</code>, then <code>fetcher.submit(…)</code>. The answer arrives in <code>fetcher.data</code>.</td>
+          </tr>
+          <tr>
+            <td><strong>effect</strong></td>
+            <td>React's "after the page is drawn, do this". Browser only.</td>
+            <td><code>useEffect(…)</code>. Used to show a toast once a fetcher has answered.</td>
+          </tr>
+          <tr>
+            <td><strong>toast</strong></td>
+            <td>The small message that slides into the corner and fades.</td>
+            <td><code>toast.success(…)</code> and <code>toast.error(…)</code>, from the <code>sonner</code> library.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Data</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Word</th>
+            <th>Means</th>
+            <th>In Cadence</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>table, row, column</strong></td>
+            <td>How a database keeps data: a table per kind of thing, a row per thing, a column per fact about it.</td>
+            <td>The <code>categories</code> table has five rows and the columns <code>id</code>, <code>name</code>, <code>slug</code>.</td>
+          </tr>
+          <tr>
+            <td><strong>schema</strong></td>
+            <td>The description of every table's shape: its columns, their types, what links to what.</td>
+            <td><code>app/db/schema.ts</code>, written with Drizzle. Its own lesson is coming.</td>
+          </tr>
+          <tr>
+            <td><strong>service</strong></td>
+            <td>A file of functions that talk to the database, so that route files do not have to. Server only.</td>
+            <td><code>app/services/categoryService.ts</code> and its neighbours.</td>
+          </tr>
+          <tr>
+            <td><strong>query</strong></td>
+            <td>One instruction to the database, in SQL or in Drizzle's SQL-shaped TypeScript.</td>
+            <td><code>db.insert(categories).values({ name, slug })</code> is <code>INSERT INTO categories …</code>.</td>
+          </tr>
+          <tr>
+            <td><strong>db</strong></td>
+            <td>The server's open connection to the database.</td>
+            <td>Exported by <code>app/db/index.ts</code>. If it appears outside a service, something is wrong.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Sources</h2>
+
+      <ol class="sources">
+        <li>
+          React Router 8.3.0 documentation: <a href="https://reactrouter.com/8.3.0/start/framework/route-module">Route Module</a>,
+          <a href="https://reactrouter.com/8.3.0/start/framework/data-loading">Data Loading</a>, <a href="https://reactrouter.com/8.3.0/start/framework/actions">Actions</a>,
+          <a href="https://reactrouter.com/8.3.0/how-to/fetchers">Using Fetchers</a>.
+        </li>
+        <li>
+          MDN, <a href="https://developer.mozilla.org/en-US/docs/Learn_web_development/Getting_started/Web_standards/How_the_web_works">How the web works</a> and
+          <a href="https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Server-side/First_steps/Client-Server_overview">Client-server overview</a>.
+        </li>
+        <li>React documentation: <a href="https://react.dev/reference/react-dom/client/hydrateRoot">hydrateRoot</a>.</li>
+        <li>SQLite, <a href="https://www.sqlite.org/about.html">About SQLite</a>. Drizzle, <a href="https://orm.drizzle.team/docs/sqlite/insert">Insert</a>.</li>
+      </ol>
+
+      <nav class="lesson-nav">
+        <a href="../lessons/0002-saving-a-change.html">Lesson 2: What happens when you press Save?</a>
+        <span>Reference: <a href="where-code-runs.html">where code runs</a> · <a href="repo-map.html">repo map</a></span>
+      </nav>
+    </main>
+  </body>
+</html>
