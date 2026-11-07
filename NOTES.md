@@ -55,6 +55,7 @@ A glossary page comes later. The skill's rule is to add a term only once the lea
 ## Authoring conventions for this workspace
 
 - Every page links `assets/course.css`. Lessons use `<main class="page">`. Reference sheets use `<main class="page sheet">`.
+- Navigation is generated, never hand-written. A page declares itself on `<body>` (`data-page="lesson" data-lesson="3"`, or `data-page="sheet" data-sheet="glossary"`), keeps only `<nav class="topbar"><a href="../index.html">Index</a></nav>` at the top and an empty `<nav class="lesson-nav"></nav>` at the bottom (sheets: the Index link again), and loads `toc.js` then `nav.js`. To publish a new lesson, add its entry to `assets/toc.js` with the sheets it built or changed. The label "Cadence, explained" appears only on the index page and in tab titles; the learner found it useless as a link.
 - Load the scripts with a plain `<script src="…" defer>`, never `type="module"`: module scripts are blocked when a page is opened from disk.
 - Biome lints HTML, CSS and JS here, and `noUndeclaredClasses` is an error: every class used in HTML must exist in `assets/course.css`. Run `npx biome check lessons reference assets` before finishing.
 - Markdown files must pass `npx markdownlint-cli2`.
@@ -67,6 +68,7 @@ A glossary page comes later. The skill's rule is to add a term only once the lea
 - `quiz.js`: multiple-choice quiz. First answer counts, options shuffle on each load, and the result can be copied as text for the learner to paste back.
 - `trace.js`: steps through a journey across browser, server and database, one hop at a time. Reuse it for every request-flow lesson.
 - `img/home-stats.jpg`: the stats band of the home page, cropped from `images/course-platform.jpg`.
+- `toc.js`: the table of contents, the one place that lists lessons and reference sheets. `nav.js` reads it and draws every page's header (Index on the left, previous and next lesson on the right), every lesson's footer (the sheets it used, then previous and next again) and the lists on `index.html`. Added 2026-11-07 at the learner's request, so that adding a lesson never means editing other pages by hand.
 
 ## Quiz rules (from the skill)
 

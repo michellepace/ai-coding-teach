@@ -307,12 +307,6 @@ img {
   text-decoration-color: var(--rule);
 }
 
-.topbar-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.3rem 1.2rem;
-}
-
 /* ---------- sidenote ----------
    Put the <aside class="sidenote"> immediately BEFORE the paragraph it
    belongs to. In the margin on wide screens, inline on narrow ones. */
@@ -899,6 +893,24 @@ pre ins {
 
 .card ul {
   padding-left: 1.1rem;
+}
+
+/* ---------- navigation (assets/nav.js draws most of it) ---------- */
+
+.nav-pager {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 1.2rem;
+  margin-left: auto;
+}
+
+.nav-refs {
+  color: var(--ink-soft);
+}
+
+.nav-muted {
+  color: var(--ink-soft);
+  opacity: 0.6;
 }
 
 /* ---------- lesson footer ---------- */
