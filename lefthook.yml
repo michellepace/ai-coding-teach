@@ -9,3 +9,5 @@ pre-commit:
       glob: "*.md"
       run: npx markdownlint-cli2 --fix {staged_files}
       stage_fixed: true
+    - name: links
+      run: node scripts/check-links.mjs

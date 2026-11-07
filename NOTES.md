@@ -59,6 +59,7 @@ A glossary page comes later. The skill's rule is to add a term only once the lea
 - Load the scripts with a plain `<script src="…" defer>`, never `type="module"`: module scripts are blocked when a page is opened from disk.
 - Biome lints HTML, CSS and JS here, and `noUndeclaredClasses` is an error: every class used in HTML must exist in `assets/course.css`. Run `npx biome check lessons reference assets` before finishing.
 - Markdown files must pass `npx markdownlint-cli2`.
+- `node scripts/check-links.mjs` checks that every local link, anchor and `toc.js` entry resolves; the pre-commit hook runs it. External links are not checked, so check them by hand now and then.
 - When a code excerpt skips lines, show line numbers (`<span class="ln">`) so the gaps are honest. Check every excerpt and line number against the real file.
 - Open a page for the learner with `explorer.exe 'lessons\<file>.html'` (it exits 1 even on success).
 
